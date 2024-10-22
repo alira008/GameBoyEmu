@@ -1,3 +1,4 @@
-add_library(GameBoyEmuCore INTERFACE)
-target_include_directories(GameBoyEmuCore INTERFACE include)
-target_compile_options(GameBoyEmuCore INTERFACE -Wno-gnu-anonymous-struct  -Wno-nested-anon-types)
+add_library(GameBoyEmuCore STATIC src/cpu.cpp src/registers.cpp src/memory.cpp)
+target_include_directories(GameBoyEmuCore PUBLIC include)
+target_compile_options(GameBoyEmuCore PUBLIC -Wno-gnu-anonymous-struct
+                                             -Wno-nested-anon-types)
