@@ -1,7 +1,7 @@
-#include <gameboyemucore.h>
+#include <gameboyemu.h>
 #include <iostream>
 
 int main() {
-  GameBoyEmuCore::Cpu cpu{};
+  GameBoyEmu::Core::Cpu cpu{};
   return 0;
 }

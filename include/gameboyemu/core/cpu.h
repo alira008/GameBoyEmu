@@ -5,7 +5,8 @@
 #include <cstdint>
 #include <functional>
 
-namespace GameBoyEmuCore {
+namespace GameBoyEmu {
+namespace Core {
 
 class Cpu {
 public:
@@ -32,4 +33,5 @@ private:
   void rrca();
 };
 
-} // namespace GameBoyEmuCore
+} // namespace Core
+} // namespace GameBoyEmu

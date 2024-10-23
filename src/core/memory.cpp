@@ -1,7 +1,8 @@
-#include "gameboyemucore/memory.h"
+#include "gameboyemu/core/memory.h"
 #include <cassert>
 
-namespace GameBoyEmuCore {
+namespace GameBoyEmu {
+namespace Core {
 
 uint8_t Memory::read_byte(uint16_t addr) const {
   assert(addr > 0 && addr < MAX_SPACE);
@@ -24,4 +25,5 @@ void Memory::write_word(uint16_t addr, uint16_t word) {
   memory_space_[addr + 1] = word & 0xFF;
 }
 
-} // namespace GameBoyEmuCore
+} // namespace Core
+} // namespace GameBoyEmu

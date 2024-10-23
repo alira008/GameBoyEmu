@@ -1,7 +1,8 @@
 #pragma once
 #include <cstdint>
 
-namespace GameBoyEmuCore {
+namespace GameBoyEmu {
+namespace Core {
 
 struct Registers {
   union {
@@ -59,4 +60,5 @@ struct Registers {
                                        int16_t value);
 };
 
-} // namespace GameBoyEmuCore
+} // namespace Core
+} // namespace GameBoyEmu

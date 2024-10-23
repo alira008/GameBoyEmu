@@ -1,7 +1,8 @@
-#include <gameboyemucore/cpu.h>
+#include "gameboyemu/core/cpu.h"
 #include <iostream>
 
-namespace GameBoyEmuCore {
+namespace GameBoyEmu {
+namespace Core {
 
 void Cpu::nop() { ++registers_.pc; }
 
@@ -41,7 +42,7 @@ void Cpu::ld_b_n() {
 
 void Cpu::rlca() {
   uint8_t bit7 = (registers_.a & 0x8) >> 7;
-  registers_.a = (registers_.a << 1) | bit7;
+  registers_.a = static_cast<uint8_t>(registers_.a << 1) | bit7;
   registers_.set_zero_flag_from_byte_result(registers_.a);
   registers_.subtract = 0;
   registers_.half_carry = 0;
@@ -100,7 +101,7 @@ void Cpu::ld_c_n() {
 
 void Cpu::rrca() {
   uint8_t bit0 = registers_.c & 0x1;
-  registers_.c = (registers_.c >> 1) | (bit0 << 7);
+  registers_.c = (registers_.c >> 1) | static_cast<uint8_t>(bit0 << 7);
   registers_.set_zero_flag_from_byte_result(registers_.a);
   registers_.subtract = 0;
   registers_.half_carry = 0;
@@ -108,4 +109,5 @@ void Cpu::rrca() {
   ++registers_.pc;
 }
 
-} // namespace GameBoyEmuCore
+} // namespace Core
+} // namespace GameBoyEmu

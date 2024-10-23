@@ -1,6 +1,7 @@
-#include "gameboyemucore/registers.h"
+#include "gameboyemu/core/registers.h"
 
-namespace GameBoyEmuCore {
+namespace GameBoyEmu {
+namespace Core {
 
 void Registers::set_half_carry_flag_from_byte_result(uint8_t old_value,
                                                      uint8_t result,
@@ -45,4 +46,5 @@ void Registers::set_carry_flag_from_word_result(uint16_t old_value,
   }
 }
 
-} // namespace GameBoyEmuCore
+} // namespace Core
+} // namespace GameBoyEmu

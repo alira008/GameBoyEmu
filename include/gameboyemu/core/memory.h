@@ -3,7 +3,8 @@
 #include <array>
 #include <stdint.h>
 
-namespace GameBoyEmuCore {
+namespace GameBoyEmu {
+namespace Core {
 
 class Memory {
 public:
@@ -17,4 +18,5 @@ private:
   std::array<uint8_t, MAX_SPACE> memory_space_;
 };
 
-} // namespace GameBoyEmuCore
+} // namespace Core
+} // namespace GameBoyEmu
