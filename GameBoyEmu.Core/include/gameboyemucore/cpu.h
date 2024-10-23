@@ -24,6 +24,7 @@ private:
   void rlca();
   void ld_nn_sp();
   void add_hl_bc();
+  void ld_a_bc();
   void dec_bc();
   void inc_c();
   void dec_c();
