@@ -13,7 +13,8 @@ public:
   void write_word(uint16_t addr, uint16_t word);
 
 private:
-  std::array<uint8_t, 0xFFFF> memory_space_;
+  static constexpr uint16_t MAX_SPACE = 0xFFFF;
+  std::array<uint8_t, MAX_SPACE> memory_space_;
 };
 
 } // namespace GameBoyEmuCore
