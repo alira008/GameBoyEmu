@@ -51,13 +51,13 @@ struct Registers {
   }
 
   void set_half_carry_flag_from_byte_result(uint8_t old_value, uint8_t result,
-                                            int16_t value);
+                                            int16_t operand);
   void set_half_carry_flag_from_word_result(uint16_t old_value, uint16_t result,
-                                            int32_t value);
+                                            int32_t operand);
   void set_carry_flag_from_byte_result(uint8_t old_value, uint8_t result,
-                                       int16_t value);
+                                       int16_t operand);
   void set_carry_flag_from_word_result(uint16_t old_value, uint16_t result,
-                                       int32_t value);
+                                       int32_t operand);
 };
 
 } // namespace Core
