@@ -50,6 +50,10 @@ struct Registers {
     zero = static_cast<uint8_t>(result == 0);
   }
 
+  inline void set_zero_flag_from_word_result(uint16_t result) {
+    zero = static_cast<uint8_t>(result == 0);
+  }
+
   void set_half_carry_flag_from_byte_result(uint8_t old_value, uint8_t result,
                                             int16_t operand);
   void set_half_carry_flag_from_word_result(uint16_t old_value, uint16_t result,

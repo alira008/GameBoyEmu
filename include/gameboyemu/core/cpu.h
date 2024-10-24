@@ -17,7 +17,7 @@ public:
 private:
   Registers registers_{};
   Memory memory_{};
-  std::array<std::function<void()>, 32> instructions_;
+  std::array<std::function<void()>, 64> instructions_;
 
   /* instruction set */
   void nop();
@@ -53,6 +53,40 @@ private:
   void dec_e();
   void ld_e_n();
   void rra();
+
+  void jr_nz_s8();
+  void ld_hl_nn();
+  void ld_hl_inc_a();
+  void inc_hl();
+  void inc_h();
+  void dec_h();
+  void ld_h_n();
+  void daa();
+  void jr_z_s8();
+  void add_hl_hl();
+  void ld_a_hl_inc();
+  void dec_hl();
+  void inc_l();
+  void dec_l();
+  void ld_l_n();
+  void cpl();
+
+  void jr_nc_s8();
+  void ld_sp_nn();
+  void ld_hl_dec_a();
+  void inc_sp();
+  void inc_hl_ref();
+  void dec_hl_ref();
+  void ld_hl_n();
+  void scf();
+  void jr_c_s8();
+  void add_hl_sp();
+  void ld_a_hl_dec();
+  void dec_sp();
+  void inc_a();
+  void dec_a();
+  void ld_a_n();
+  void ccf();
 };
 
 enum class Instruction {
@@ -89,6 +123,40 @@ enum class Instruction {
   DecE,
   LdEN,
   Rra,
+
+  JrNZS8,
+  LdHLNN,
+  LdHLIncA,
+  IncHL,
+  IncH,
+  DecH,
+  LdHN,
+  Daa,
+  JrZS8,
+  AddHLHL,
+  LdAHLInc,
+  DecDL,
+  IncL,
+  DecL,
+  LdLN,
+  CPL,
+
+  JrNCS8,
+  LdSPNN,
+  LdHLDecA,
+  IncSP,
+  IncHLRef,
+  DecHLRef,
+  LdHLRefN,
+  Scf,
+  JrCS8,
+  AddHLSP,
+  LdAHLDec,
+  DecSP,
+  IncA,
+  DecA,
+  LdAN,
+  CCF,
 };
 
 } // namespace Core
