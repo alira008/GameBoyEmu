@@ -1,4 +1,5 @@
 #include "gameboyemu/core/cpu.h"
+#include <cassert>
 #include <functional>
 #include <iostream>
 
@@ -222,6 +223,7 @@ Cpu::Cpu()
           std::bind(&Cpu::ret_z, this),
           std::bind(&Cpu::ret, this),
           std::bind(&Cpu::jp_z_nn, this),
+          nullptr,
           std::bind(&Cpu::call_z_nn, this),
           std::bind(&Cpu::call_nn, this),
           std::bind(&Cpu::adc_a_n, this),
@@ -230,6 +232,7 @@ Cpu::Cpu()
           std::bind(&Cpu::ret_nc, this),
           std::bind(&Cpu::pop_de, this),
           std::bind(&Cpu::jp_nc_nn, this),
+          nullptr,
           std::bind(&Cpu::call_nc_nn, this),
           std::bind(&Cpu::push_de, this),
           std::bind(&Cpu::sub_a_n, this),
@@ -237,19 +240,26 @@ Cpu::Cpu()
           std::bind(&Cpu::ret_c, this),
           std::bind(&Cpu::reti, this),
           std::bind(&Cpu::jp_c_nn, this),
+          nullptr,
           std::bind(&Cpu::call_c_nn, this),
+          nullptr,
           std::bind(&Cpu::sbc_a_n, this),
           std::bind(&Cpu::rst_3, this),
 
           std::bind(&Cpu::ld_n_ref_a, this),
           std::bind(&Cpu::pop_hl, this),
           std::bind(&Cpu::ld_c_ref_a, this),
+          nullptr,
+          nullptr,
           std::bind(&Cpu::push_hl, this),
           std::bind(&Cpu::and_a_n, this),
           std::bind(&Cpu::rst_4, this),
           std::bind(&Cpu::add_sp_n, this),
           std::bind(&Cpu::jp_hl, this),
           std::bind(&Cpu::ld_nn_ref_a, this),
+          nullptr,
+          nullptr,
+          nullptr,
           std::bind(&Cpu::xor_a_n, this),
           std::bind(&Cpu::rst_5, this),
 
@@ -257,6 +267,7 @@ Cpu::Cpu()
           std::bind(&Cpu::pop_af, this),
           std::bind(&Cpu::ld_a_c_ref, this),
           std::bind(&Cpu::di, this),
+          nullptr,
           std::bind(&Cpu::push_af, this),
           std::bind(&Cpu::or_a_n, this),
           std::bind(&Cpu::rst_6, this),
@@ -264,9 +275,30 @@ Cpu::Cpu()
           std::bind(&Cpu::ld_sp_hl, this),
           std::bind(&Cpu::ld_a_nn_ref, this),
           std::bind(&Cpu::e_i, this),
+          nullptr,
+          nullptr,
           std::bind(&Cpu::cp_a_n, this),
           std::bind(&Cpu::rst_7, this),
       } {}
+
+Instruction Cpu::fetch_current_instruction() {
+  uint8_t opcode = memory_.read_byte(registers_.pc);
+
+  assert(opcode > 0 &&
+         static_cast<uint32_t>(opcode) < TOTAL_NUMBER_OF_INSTRUCTION);
+
+  return static_cast<Instruction>(opcode);
+}
+
+void Cpu::execute_instruction(Instruction instruction) {
+  size_t index = static_cast<size_t>(instruction);
+  if (index < instructions_.size() && instructions_[index]) {
+    // execute
+    instructions_[index]();
+  } else {
+    // todo: handle this case
+  }
+}
 
 void Cpu::pop_stack_into_reg_16(uint16_t &reg) {
   uint8_t sp_content = memory_.read_byte(registers_.sp);
@@ -287,21 +319,27 @@ void Cpu::push_onto_stack_reg_16(uint16_t content) {
   registers_.pc = content;
 }
 
-void Cpu::nop() { ++registers_.pc; }
+void Cpu::nop() {
+  ++registers_.pc;
+  ++total_cycles_;
+}
 
 void Cpu::ld_bc_nn() {
   registers_.bc = memory_.read_word(registers_.pc + 1);
   registers_.pc += 3;
+  total_cycles_ += 3;
 }
 
 void Cpu::ld_bc_a() {
   memory_.write_byte(registers_.bc, registers_.a);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::inc_bc() {
   ++registers_.bc;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::inc_b() {
@@ -311,6 +349,7 @@ void Cpu::inc_b() {
   registers_.set_half_carry_flag_from_byte_result(old_value, registers_.b, 1);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::dec_b() {
@@ -319,11 +358,13 @@ void Cpu::dec_b() {
   registers_.set_half_carry_flag_from_byte_result(old_value, registers_.b, -1);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_b_n() {
   registers_.b = memory_.read_byte(registers_.pc + 1);
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::rlca() {
@@ -334,12 +375,14 @@ void Cpu::rlca() {
   registers_.half_carry = 0;
   registers_.carry = bit7;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_nn_sp() {
   uint16_t address = memory_.read_word(registers_.sp + 1);
   memory_.write_word(address, registers_.sp);
   registers_.pc += 3;
+  total_cycles_ += 5;
 }
 
 void Cpu::add_hl_bc() {
@@ -351,17 +394,20 @@ void Cpu::add_hl_bc() {
   registers_.set_carry_flag_from_word_result(old_hl, registers_.hl,
                                              registers_.bc);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::ld_a_bc() {
   uint8_t content = memory_.read_byte(registers_.bc);
   memory_.write_byte(registers_.a, content);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::dec_bc() {
   --registers_.bc;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::inc_c() {
@@ -370,6 +416,7 @@ void Cpu::inc_c() {
   registers_.set_zero_flag_from_byte_result(registers_.c);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::dec_c() {
@@ -378,11 +425,13 @@ void Cpu::dec_c() {
   registers_.set_zero_flag_from_byte_result(registers_.c);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_c_n() {
   registers_.c = memory_.read_byte(registers_.pc + 1);
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::rrca() {
@@ -393,24 +442,31 @@ void Cpu::rrca() {
   registers_.half_carry = 0;
   registers_.carry = bit0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 // todo: finish this function
-void Cpu::stop() { registers_.pc += 2; }
+void Cpu::stop() {
+  registers_.pc += 2;
+  ++total_cycles_;
+}
 
 void Cpu::ld_de_nn() {
   registers_.de = memory_.read_word(registers_.pc + 1);
   registers_.pc += 3;
+  total_cycles_ += 3;
 }
 
 void Cpu::ld_de_a() {
   memory_.write_byte(registers_.de, registers_.a);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::inc_de() {
   ++registers_.de;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::inc_d() {
@@ -420,6 +476,7 @@ void Cpu::inc_d() {
   registers_.set_half_carry_flag_from_byte_result(old_value, registers_.d, 1);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::dec_d() {
@@ -428,11 +485,13 @@ void Cpu::dec_d() {
   registers_.set_half_carry_flag_from_byte_result(old_value, registers_.d, -1);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_d_n() {
   registers_.d = memory_.read_byte(registers_.pc + 1);
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::rla() {
@@ -443,12 +502,14 @@ void Cpu::rla() {
   registers_.half_carry = 0;
   registers_.carry = bit7;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::jr_s8() {
   uint16_t steps = memory_.read_word(registers_.pc + 1);
   registers_.pc += steps;
   registers_.pc += 2;
+  total_cycles_ += 3;
 }
 
 void Cpu::add_hl_de() {
@@ -460,17 +521,20 @@ void Cpu::add_hl_de() {
   registers_.set_carry_flag_from_word_result(old_hl, registers_.hl,
                                              registers_.de);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::ld_a_de() {
   uint8_t content = memory_.read_byte(registers_.de);
   memory_.write_byte(registers_.a, content);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::dec_de() {
   --registers_.de;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::inc_e() {
@@ -479,6 +543,7 @@ void Cpu::inc_e() {
   registers_.set_zero_flag_from_byte_result(registers_.e);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::dec_e() {
@@ -487,11 +552,13 @@ void Cpu::dec_e() {
   registers_.set_zero_flag_from_byte_result(registers_.e);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_e_n() {
   registers_.e = memory_.read_byte(registers_.pc + 1);
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::rra() {
@@ -503,12 +570,16 @@ void Cpu::rra() {
   registers_.half_carry = 0;
   registers_.carry = bit0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::jr_nz_s8() {
   if (!registers_.zero) {
     uint16_t steps = memory_.read_word(registers_.pc + 1);
     registers_.pc += steps;
+    total_cycles_ += 3;
+  } else {
+    total_cycles_ += 2;
   }
   registers_.pc += 2;
 }
@@ -516,16 +587,19 @@ void Cpu::jr_nz_s8() {
 void Cpu::ld_hl_nn() {
   registers_.hl = memory_.read_word(registers_.pc + 1);
   registers_.pc += 3;
+  total_cycles_ += 3;
 }
 
 void Cpu::ld_hl_inc_a() {
   memory_.write_byte(registers_.hl++, registers_.a);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::inc_hl() {
   ++registers_.hl;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::inc_h() {
@@ -535,6 +609,7 @@ void Cpu::inc_h() {
   registers_.set_half_carry_flag_from_byte_result(old_h, registers_.h, 1);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::dec_h() {
@@ -543,11 +618,13 @@ void Cpu::dec_h() {
   registers_.set_half_carry_flag_from_byte_result(old_h, registers_.h, -1);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_h_n() {
   registers_.d = memory_.read_byte(registers_.pc + 1);
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::daa() {
@@ -573,12 +650,16 @@ void Cpu::daa() {
   registers_.set_zero_flag_from_byte_result(registers_.a);
   registers_.half_carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::jr_z_s8() {
   if (registers_.zero) {
     uint16_t steps = memory_.read_word(registers_.pc + 1);
     registers_.pc += steps;
+    total_cycles_ += 3;
+  } else {
+    total_cycles_ += 2;
   }
   registers_.pc += 2;
 }
@@ -592,17 +673,20 @@ void Cpu::add_hl_hl() {
   registers_.set_carry_flag_from_word_result(old_hl, registers_.hl,
                                              registers_.hl);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::ld_a_hl_inc() {
   uint8_t content = memory_.read_byte(registers_.hl++);
   memory_.write_byte(registers_.a, content);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::dec_hl() {
   --registers_.hl;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::inc_l() {
@@ -611,6 +695,7 @@ void Cpu::inc_l() {
   registers_.set_zero_flag_from_byte_result(registers_.l);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::dec_l() {
@@ -619,11 +704,13 @@ void Cpu::dec_l() {
   registers_.set_zero_flag_from_byte_result(registers_.l);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_l_n() {
   registers_.l = memory_.read_byte(registers_.pc + 1);
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::cpl() {
@@ -631,12 +718,16 @@ void Cpu::cpl() {
   registers_.subtract = 1;
   registers_.half_carry = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::jr_nc_s8() {
   if (!registers_.carry) {
     uint16_t steps = memory_.read_word(registers_.pc + 1);
     registers_.pc += steps;
+    total_cycles_ += 3;
+  } else {
+    total_cycles_ += 2;
   }
   registers_.pc += 2;
 }
@@ -644,16 +735,19 @@ void Cpu::jr_nc_s8() {
 void Cpu::ld_sp_nn() {
   registers_.sp = memory_.read_word(registers_.pc + 1);
   registers_.pc += 3;
+  total_cycles_ += 3;
 }
 
 void Cpu::ld_hl_dec_a() {
   memory_.write_byte(registers_.hl--, registers_.a);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::inc_sp() {
   ++registers_.sp;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::inc_hl_ref() {
@@ -666,6 +760,7 @@ void Cpu::inc_hl_ref() {
                                                   new_hl_content, 1);
   registers_.subtract = 0;
   ++registers_.pc;
+  total_cycles_ += 3;
 }
 
 void Cpu::dec_hl_ref() {
@@ -678,24 +773,30 @@ void Cpu::dec_hl_ref() {
                                                   new_hl_content, -1);
   registers_.subtract = 1;
   ++registers_.pc;
+  total_cycles_ += 3;
 }
 
 void Cpu::ld_hl_n() {
   uint8_t content = memory_.read_byte(registers_.pc + 1);
   memory_.write_byte(registers_.hl, content);
   registers_.pc += 2;
+  total_cycles_ += 3;
 }
 
 void Cpu::scf() {
   registers_.carry = 1;
   registers_.half_carry = 0;
   registers_.subtract = 0;
+  ++total_cycles_;
 }
 
 void Cpu::jr_c_s8() {
   if (registers_.carry) {
     uint16_t steps = memory_.read_word(registers_.pc + 1);
     registers_.pc += steps;
+    total_cycles_ += 3;
+  } else {
+    total_cycles_ += 2;
   }
   registers_.pc += 2;
 }
@@ -709,17 +810,20 @@ void Cpu::add_hl_sp() {
   registers_.set_carry_flag_from_word_result(old_hl, registers_.hl,
                                              registers_.sp);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::ld_a_hl_dec() {
   uint8_t content = memory_.read_byte(registers_.hl--);
   memory_.write_byte(registers_.a, content);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::dec_sp() {
   --registers_.sp;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::inc_a() {
@@ -728,6 +832,7 @@ void Cpu::inc_a() {
   registers_.set_zero_flag_from_byte_result(registers_.a);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::dec_a() {
@@ -736,11 +841,13 @@ void Cpu::dec_a() {
   registers_.set_zero_flag_from_byte_result(registers_.a);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_a_n() {
   registers_.a = memory_.read_byte(registers_.pc + 1);
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::ccf() {
@@ -748,258 +855,340 @@ void Cpu::ccf() {
   registers_.subtract = 0;
   registers_.half_carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_b_b() {
   registers_.b = registers_.b;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_b_c() {
   registers_.b = registers_.c;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_b_d() {
   registers_.b = registers_.d;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_b_e() {
   registers_.b = registers_.e;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_b_h() {
   registers_.b = registers_.h;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_b_l() {
   registers_.b = registers_.l;
   ++registers_.pc;
+  ++total_cycles_;
 }
-void Cpu::ld_b_hl_ref() { registers_.b = memory_.read_byte(registers_.hl); }
+void Cpu::ld_b_hl_ref() {
+  registers_.b = memory_.read_byte(registers_.hl);
+  total_cycles_ += 2;
+}
 void Cpu::ld_b_a() {
   registers_.b = registers_.a;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_c_b() {
   registers_.c = registers_.b;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_c_c() {
   registers_.c = registers_.c;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_c_d() {
   registers_.c = registers_.d;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_c_e() {
   registers_.c = registers_.e;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_c_h() {
   registers_.c = registers_.h;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_c_l() {
   registers_.c = registers_.l;
   ++registers_.pc;
+  ++total_cycles_;
 }
-void Cpu::ld_c_hl_ref() { registers_.c = memory_.read_byte(registers_.hl); }
+void Cpu::ld_c_hl_ref() {
+  registers_.c = memory_.read_byte(registers_.hl);
+  total_cycles_ += 2;
+}
 void Cpu::ld_c_a() {
   registers_.c = registers_.a;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_d_b() {
   registers_.d = registers_.b;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_d_c() {
   registers_.d = registers_.c;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_d_d() {
   registers_.d = registers_.d;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_d_e() {
   registers_.d = registers_.e;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_d_h() {
   registers_.d = registers_.h;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_d_l() {
   registers_.d = registers_.l;
   ++registers_.pc;
+  ++total_cycles_;
 }
-void Cpu::ld_d_hl_ref() { registers_.d = memory_.read_byte(registers_.hl); }
+void Cpu::ld_d_hl_ref() {
+  registers_.d = memory_.read_byte(registers_.hl);
+  total_cycles_ += 2;
+}
 void Cpu::ld_d_a() {
   registers_.d = registers_.a;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_e_b() {
   registers_.e = registers_.b;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_e_c() {
   registers_.e = registers_.c;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_e_d() {
   registers_.e = registers_.d;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_e_e() {
   registers_.e = registers_.e;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_e_h() {
   registers_.e = registers_.h;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_e_l() {
   registers_.e = registers_.l;
   ++registers_.pc;
+  ++total_cycles_;
 }
-void Cpu::ld_e_hl_ref() { registers_.e = memory_.read_byte(registers_.hl); }
+void Cpu::ld_e_hl_ref() {
+  registers_.e = memory_.read_byte(registers_.hl);
+  total_cycles_ += 2;
+}
 void Cpu::ld_e_a() {
   registers_.e = registers_.a;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_h_b() {
   registers_.h = registers_.b;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_h_c() {
   registers_.h = registers_.c;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_h_d() {
   registers_.h = registers_.d;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_h_e() {
   registers_.h = registers_.e;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_h_h() {
   registers_.h = registers_.h;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_h_l() {
   registers_.h = registers_.l;
   ++registers_.pc;
+  ++total_cycles_;
 }
-void Cpu::ld_h_hl_ref() { registers_.h = memory_.read_byte(registers_.hl); }
+void Cpu::ld_h_hl_ref() {
+  registers_.h = memory_.read_byte(registers_.hl);
+  total_cycles_ += 2;
+}
 void Cpu::ld_h_a() {
   registers_.h = registers_.a;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_l_b() {
   registers_.l = registers_.b;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_l_c() {
   registers_.l = registers_.c;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_l_d() {
   registers_.l = registers_.d;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_l_e() {
   registers_.l = registers_.e;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_l_h() {
   registers_.l = registers_.h;
   ++registers_.pc;
+  ++total_cycles_;
 }
 void Cpu::ld_l_l() {
   registers_.l = registers_.l;
   ++registers_.pc;
+  ++total_cycles_;
 }
-void Cpu::ld_l_hl_ref() { registers_.l = memory_.read_byte(registers_.hl); }
+void Cpu::ld_l_hl_ref() {
+  registers_.l = memory_.read_byte(registers_.hl);
+  total_cycles_ += 2;
+}
 void Cpu::ld_l_a() {
   registers_.l = registers_.a;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_hl_ref_b() {
   memory_.write_byte(registers_.hl, registers_.b);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::ld_hl_ref_c() {
   memory_.write_byte(registers_.hl, registers_.c);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::ld_hl_ref_d() {
   memory_.write_byte(registers_.hl, registers_.d);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::ld_hl_ref_e() {
   memory_.write_byte(registers_.hl, registers_.e);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::ld_hl_ref_h() {
   memory_.write_byte(registers_.hl, registers_.h);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::ld_hl_ref_l() {
   memory_.write_byte(registers_.hl, registers_.l);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 // todo: finish this func
-void Cpu::halt() { ++registers_.pc; }
+void Cpu::halt() {
+  ++registers_.pc;
+  ++total_cycles_;
+}
 
 void Cpu::ld_hl_ref_a() {
   registers_.f = registers_.a;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::ld_a_b() {
   registers_.a = registers_.b;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_a_c() {
   registers_.a = registers_.c;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_a_d() {
   registers_.a = registers_.d;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_a_e() {
   registers_.a = registers_.e;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_a_h() {
   registers_.a = registers_.h;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ld_a_l() {
   registers_.a = registers_.l;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
-void Cpu::ld_a_hl_ref() { registers_.a = memory_.read_byte(registers_.hl); }
+void Cpu::ld_a_hl_ref() {
+  registers_.a = memory_.read_byte(registers_.hl);
+  total_cycles_ += 2;
+  total_cycles_ += 2;
+}
 
 void Cpu::ld_a_a() {
   registers_.a = registers_.a;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::add_a_b() {
@@ -1012,6 +1201,7 @@ void Cpu::add_a_b() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.b);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::add_a_c() {
@@ -1024,6 +1214,7 @@ void Cpu::add_a_c() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.c);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::add_a_d() {
@@ -1036,6 +1227,7 @@ void Cpu::add_a_d() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.d);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::add_a_e() {
@@ -1048,6 +1240,7 @@ void Cpu::add_a_e() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.e);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::add_a_h() {
@@ -1060,6 +1253,7 @@ void Cpu::add_a_h() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.h);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::add_a_l() {
@@ -1072,6 +1266,7 @@ void Cpu::add_a_l() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.l);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::add_a_hl_ref() {
@@ -1085,6 +1280,7 @@ void Cpu::add_a_hl_ref() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, hl_content);
   registers_.subtract = 0;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::add_a_a() {
@@ -1097,6 +1293,7 @@ void Cpu::add_a_a() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.a);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::adc_a_b() {
@@ -1109,6 +1306,7 @@ void Cpu::adc_a_b() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::adc_a_c() {
@@ -1121,6 +1319,7 @@ void Cpu::adc_a_c() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::adc_a_d() {
@@ -1133,6 +1332,7 @@ void Cpu::adc_a_d() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::adc_a_e() {
@@ -1145,6 +1345,7 @@ void Cpu::adc_a_e() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::adc_a_h() {
@@ -1157,6 +1358,7 @@ void Cpu::adc_a_h() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::adc_a_l() {
@@ -1169,6 +1371,7 @@ void Cpu::adc_a_l() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::adc_a_hl_ref() {
@@ -1182,6 +1385,7 @@ void Cpu::adc_a_hl_ref() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 0;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::adc_a_a() {
@@ -1194,6 +1398,7 @@ void Cpu::adc_a_a() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sub_a_b() {
@@ -1206,6 +1411,7 @@ void Cpu::sub_a_b() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.b);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sub_a_c() {
@@ -1218,6 +1424,7 @@ void Cpu::sub_a_c() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.c);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sub_a_d() {
@@ -1230,6 +1437,7 @@ void Cpu::sub_a_d() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.d);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sub_a_e() {
@@ -1242,6 +1450,7 @@ void Cpu::sub_a_e() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.e);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sub_a_h() {
@@ -1254,6 +1463,7 @@ void Cpu::sub_a_h() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.h);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sub_a_l() {
@@ -1266,6 +1476,7 @@ void Cpu::sub_a_l() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.l);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sub_a_hl_ref() {
@@ -1279,6 +1490,7 @@ void Cpu::sub_a_hl_ref() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, hl_content);
   registers_.subtract = 1;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::sub_a_a() {
@@ -1291,6 +1503,7 @@ void Cpu::sub_a_a() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, registers_.a);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sbc_a_b() {
@@ -1303,6 +1516,7 @@ void Cpu::sbc_a_b() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sbc_a_c() {
@@ -1315,6 +1529,7 @@ void Cpu::sbc_a_c() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sbc_a_d() {
@@ -1327,6 +1542,7 @@ void Cpu::sbc_a_d() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sbc_a_e() {
@@ -1339,6 +1555,7 @@ void Cpu::sbc_a_e() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sbc_a_h() {
@@ -1351,6 +1568,7 @@ void Cpu::sbc_a_h() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sbc_a_l() {
@@ -1363,6 +1581,7 @@ void Cpu::sbc_a_l() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::sbc_a_hl_ref() {
@@ -1376,6 +1595,7 @@ void Cpu::sbc_a_hl_ref() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 1;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::sbc_a_a() {
@@ -1388,6 +1608,7 @@ void Cpu::sbc_a_a() {
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.subtract = 1;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::and_a_b() {
@@ -1397,6 +1618,7 @@ void Cpu::and_a_b() {
   registers_.half_carry = 1;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::and_a_c() {
@@ -1406,6 +1628,7 @@ void Cpu::and_a_c() {
   registers_.half_carry = 1;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::and_a_d() {
@@ -1415,6 +1638,7 @@ void Cpu::and_a_d() {
   registers_.half_carry = 1;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::and_a_e() {
@@ -1424,6 +1648,7 @@ void Cpu::and_a_e() {
   registers_.half_carry = 1;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::and_a_h() {
@@ -1433,6 +1658,7 @@ void Cpu::and_a_h() {
   registers_.half_carry = 1;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::and_a_l() {
@@ -1442,6 +1668,7 @@ void Cpu::and_a_l() {
   registers_.half_carry = 1;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::and_a_hl_ref() {
@@ -1452,6 +1679,7 @@ void Cpu::and_a_hl_ref() {
   registers_.half_carry = 1;
   registers_.carry = 0;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::and_a_a() {
@@ -1461,6 +1689,7 @@ void Cpu::and_a_a() {
   registers_.half_carry = 1;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::xor_a_b() {
@@ -1470,6 +1699,7 @@ void Cpu::xor_a_b() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::xor_a_c() {
@@ -1479,6 +1709,7 @@ void Cpu::xor_a_c() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::xor_a_d() {
@@ -1488,6 +1719,7 @@ void Cpu::xor_a_d() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::xor_a_e() {
@@ -1497,6 +1729,7 @@ void Cpu::xor_a_e() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::xor_a_h() {
@@ -1506,6 +1739,7 @@ void Cpu::xor_a_h() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::xor_a_l() {
@@ -1515,6 +1749,7 @@ void Cpu::xor_a_l() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::xor_a_hl_ref() {
@@ -1525,6 +1760,7 @@ void Cpu::xor_a_hl_ref() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::xor_a_a() {
@@ -1534,6 +1770,7 @@ void Cpu::xor_a_a() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::or_a_b() {
@@ -1543,6 +1780,7 @@ void Cpu::or_a_b() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::or_a_c() {
@@ -1552,6 +1790,7 @@ void Cpu::or_a_c() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::or_a_d() {
@@ -1561,6 +1800,7 @@ void Cpu::or_a_d() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::or_a_e() {
@@ -1570,6 +1810,7 @@ void Cpu::or_a_e() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::or_a_h() {
@@ -1579,6 +1820,7 @@ void Cpu::or_a_h() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::or_a_l() {
@@ -1588,6 +1830,7 @@ void Cpu::or_a_l() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::or_a_hl_ref() {
@@ -1598,6 +1841,7 @@ void Cpu::or_a_hl_ref() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::or_a_a() {
@@ -1607,6 +1851,7 @@ void Cpu::or_a_a() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::cp_a_b() {
@@ -1617,6 +1862,7 @@ void Cpu::cp_a_b() {
   registers_.set_carry_flag_from_byte_result(registers_.a, registers_.zero,
                                              registers_.b);
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::cp_a_c() {
@@ -1627,6 +1873,7 @@ void Cpu::cp_a_c() {
   registers_.set_carry_flag_from_byte_result(registers_.a, registers_.zero,
                                              registers_.c);
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::cp_a_d() {
@@ -1637,6 +1884,7 @@ void Cpu::cp_a_d() {
   registers_.set_carry_flag_from_byte_result(registers_.a, registers_.zero,
                                              registers_.d);
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::cp_a_e() {
@@ -1647,6 +1895,7 @@ void Cpu::cp_a_e() {
   registers_.set_carry_flag_from_byte_result(registers_.a, registers_.zero,
                                              registers_.e);
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::cp_a_h() {
@@ -1657,6 +1906,7 @@ void Cpu::cp_a_h() {
   registers_.set_carry_flag_from_byte_result(registers_.a, registers_.zero,
                                              registers_.h);
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::cp_a_l() {
@@ -1667,6 +1917,7 @@ void Cpu::cp_a_l() {
   registers_.set_carry_flag_from_byte_result(registers_.a, registers_.zero,
                                              registers_.l);
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::cp_a_hl_ref() {
@@ -1678,6 +1929,7 @@ void Cpu::cp_a_hl_ref() {
   registers_.set_carry_flag_from_byte_result(registers_.a, registers_.zero,
                                              hl_content);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::cp_a_a() {
@@ -1688,11 +1940,15 @@ void Cpu::cp_a_a() {
   registers_.set_carry_flag_from_byte_result(registers_.a, registers_.zero,
                                              registers_.a);
   ++registers_.pc;
+  ++total_cycles_;
 }
 
 void Cpu::ret_nz() {
   if (!registers_.zero) {
     pop_stack_into_reg_16(registers_.pc);
+    total_cycles_ += 5;
+  } else {
+    total_cycles_ += 2;
   }
   ++registers_.pc;
 }
@@ -1700,30 +1956,39 @@ void Cpu::ret_nz() {
 void Cpu::pop_bc() {
   pop_stack_into_reg_16(registers_.bc);
   ++registers_.pc;
+  total_cycles_ += 3;
 }
 
 void Cpu::jp_nz_nn() {
   if (!registers_.zero) {
     registers_.pc = memory_.read_word(registers_.pc + 1);
+    total_cycles_ += 4;
   } else {
     registers_.pc += 3;
+    total_cycles_ += 3;
   }
 }
 
-void Cpu::jp_nn() { registers_.pc = memory_.read_word(registers_.pc + 1); }
+void Cpu::jp_nn() {
+  registers_.pc = memory_.read_word(registers_.pc + 1);
+  total_cycles_ += 4;
+}
 
 void Cpu::call_nz_nn() {
   if (!registers_.zero) {
     uint16_t call_address = memory_.read_word(registers_.pc + 1);
     push_onto_stack_reg_16(call_address);
+    total_cycles_ += 6;
   } else {
     registers_.pc += 3;
+    total_cycles_ += 3;
   }
 }
 
 void Cpu::push_bc() {
   push_onto_stack_reg_16(registers_.bc);
   ++registers_.pc;
+  total_cycles_ += 4;
 }
 
 void Cpu::add_a_n() {
@@ -1735,16 +2000,21 @@ void Cpu::add_a_n() {
   registers_.set_half_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::rst_0() {
   push_onto_stack_reg_16(registers_.pc);
   registers_.pc = 0x00;
+  total_cycles_ += 4;
 }
 
 void Cpu::ret_z() {
   if (registers_.zero) {
     pop_stack_into_reg_16(registers_.pc);
+    total_cycles_ += 5;
+  } else {
+    total_cycles_ += 2;
   }
   ++registers_.pc;
 }
@@ -1752,13 +2022,16 @@ void Cpu::ret_z() {
 void Cpu::ret() {
   pop_stack_into_reg_16(registers_.pc);
   ++registers_.pc;
+  total_cycles_ += 4;
 }
 
 void Cpu::jp_z_nn() {
   if (registers_.zero) {
     registers_.pc = memory_.read_word(registers_.pc + 1);
+    total_cycles_ += 4;
   } else {
     registers_.pc += 3;
+    total_cycles_ += 3;
   }
 }
 
@@ -1766,14 +2039,17 @@ void Cpu::call_z_nn() {
   if (registers_.zero) {
     uint16_t call_address = memory_.read_word(registers_.pc + 1);
     push_onto_stack_reg_16(call_address);
+    total_cycles_ += 6;
   } else {
     registers_.pc += 3;
+    total_cycles_ += 3;
   }
 }
 
 void Cpu::call_nn() {
   uint16_t call_address = memory_.read_word(registers_.pc + 1);
   push_onto_stack_reg_16(call_address);
+  total_cycles_ += 6;
 }
 
 void Cpu::adc_a_n() {
@@ -1786,16 +2062,21 @@ void Cpu::adc_a_n() {
   registers_.set_half_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::rst_1() {
   push_onto_stack_reg_16(registers_.pc);
   registers_.pc = 0x08;
+  total_cycles_ += 4;
 }
 
 void Cpu::ret_nc() {
   if (!registers_.carry) {
     pop_stack_into_reg_16(registers_.pc);
+    total_cycles_ += 5;
+  } else {
+    total_cycles_ += 2;
   }
   ++registers_.pc;
 }
@@ -1803,13 +2084,16 @@ void Cpu::ret_nc() {
 void Cpu::pop_de() {
   pop_stack_into_reg_16(registers_.de);
   ++registers_.pc;
+  total_cycles_ += 3;
 }
 
 void Cpu::jp_nc_nn() {
   if (!registers_.carry) {
     registers_.pc = memory_.read_word(registers_.pc + 1);
+    total_cycles_ += 4;
   } else {
     registers_.pc += 3;
+    total_cycles_ += 3;
   }
 }
 
@@ -1817,14 +2101,17 @@ void Cpu::call_nc_nn() {
   if (!registers_.carry) {
     uint16_t call_address = memory_.read_word(registers_.pc + 1);
     push_onto_stack_reg_16(call_address);
+    total_cycles_ += 6;
   } else {
     registers_.pc += 3;
+    total_cycles_ += 3;
   }
 }
 
 void Cpu::push_de() {
   push_onto_stack_reg_16(registers_.de);
   ++registers_.pc;
+  total_cycles_ += 4;
 }
 
 void Cpu::sub_a_n() {
@@ -1836,16 +2123,21 @@ void Cpu::sub_a_n() {
   registers_.set_half_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::rst_2() {
   push_onto_stack_reg_16(registers_.pc);
   registers_.pc = 0x10;
+  total_cycles_ += 4;
 }
 
 void Cpu::ret_c() {
   if (registers_.carry) {
     pop_stack_into_reg_16(registers_.pc);
+    total_cycles_ += 5;
+  } else {
+    total_cycles_ += 2;
   }
   ++registers_.pc;
 }
@@ -1853,13 +2145,16 @@ void Cpu::ret_c() {
 void Cpu::reti() {
   // todo finish this func
   ++registers_.pc;
+  total_cycles_ += 4;
 }
 
 void Cpu::jp_c_nn() {
   if (registers_.carry) {
     registers_.pc = memory_.read_word(registers_.pc + 1);
+    total_cycles_ += 4;
   } else {
     registers_.pc += 3;
+    total_cycles_ += 3;
   }
 }
 
@@ -1867,8 +2162,10 @@ void Cpu::call_c_nn() {
   if (registers_.carry) {
     uint16_t call_address = memory_.read_word(registers_.pc + 1);
     push_onto_stack_reg_16(call_address);
+    total_cycles_ += 6;
   } else {
     registers_.pc += 3;
+    total_cycles_ += 3;
   }
 }
 
@@ -1882,22 +2179,26 @@ void Cpu::sbc_a_n() {
   registers_.set_half_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::rst_3() {
   push_onto_stack_reg_16(registers_.pc);
   registers_.pc = 0x18;
+  total_cycles_ += 4;
 }
 
 void Cpu::ld_n_ref_a() {
   uint8_t imm_op = memory_.read_byte(registers_.pc + 1);
   memory_.write_byte(0xFF00 | imm_op, registers_.a);
   registers_.pc += 2;
+  total_cycles_ += 3;
 }
 
 void Cpu::pop_hl() {
   pop_stack_into_reg_16(registers_.hl);
   ++registers_.pc;
+  total_cycles_ += 3;
 }
 
 void Cpu::ld_c_ref_a() {
@@ -1905,11 +2206,13 @@ void Cpu::ld_c_ref_a() {
       memory_.read_byte(static_cast<uint8_t>(0xFF00) | registers_.c);
   memory_.write_byte(address, registers_.a);
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::push_hl() {
   push_onto_stack_reg_16(registers_.hl);
   ++registers_.pc;
+  total_cycles_ += 4;
 }
 
 void Cpu::and_a_n() {
@@ -1921,11 +2224,13 @@ void Cpu::and_a_n() {
   registers_.set_half_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.set_carry_flag_from_byte_result(old_a, registers_.a, operand);
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::rst_4() {
   push_onto_stack_reg_16(registers_.pc);
   registers_.pc = 0x20;
+  total_cycles_ += 4;
 }
 
 void Cpu::add_sp_n() {
@@ -1938,14 +2243,19 @@ void Cpu::add_sp_n() {
                                                   operand);
   registers_.set_carry_flag_from_word_result(old_sp, registers_.a, operand);
   registers_.pc += 2;
+  total_cycles_ += 4;
 }
 
-void Cpu::jp_hl() { registers_.pc = memory_.read_word(registers_.hl + 1); }
+void Cpu::jp_hl() {
+  registers_.pc = memory_.read_word(registers_.hl + 1);
+  ++total_cycles_;
+}
 
 void Cpu::ld_nn_ref_a() {
   uint16_t imm_op = memory_.read_word(registers_.pc + 1);
   memory_.write_byte(imm_op, registers_.a);
   registers_.pc += 2;
+  total_cycles_ += 4;
 }
 
 void Cpu::xor_a_n() {
@@ -1957,22 +2267,26 @@ void Cpu::xor_a_n() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::rst_5() {
   push_onto_stack_reg_16(registers_.pc);
   registers_.pc = 0x28;
+  total_cycles_ += 4;
 }
 
 void Cpu::ld_a_n_ref() {
   uint8_t imm_op = memory_.read_byte(registers_.pc + 1);
   registers_.a = memory_.read_byte(imm_op);
   registers_.pc += 2;
+  total_cycles_ += 3;
 }
 
 void Cpu::pop_af() {
   pop_stack_into_reg_16(registers_.af);
   ++registers_.pc;
+  total_cycles_ += 3;
 }
 
 void Cpu::ld_a_c_ref() {
@@ -1980,14 +2294,19 @@ void Cpu::ld_a_c_ref() {
       memory_.read_byte(static_cast<uint8_t>(0xFF00) | registers_.c);
   registers_.a = content;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 // todo: finish this func
-void Cpu::di() { ++registers_.pc; }
+void Cpu::di() {
+  ++registers_.pc;
+  ++total_cycles_;
+}
 
 void Cpu::push_af() {
   push_onto_stack_reg_16(registers_.af);
   ++registers_.pc;
+  total_cycles_ += 4;
 }
 
 void Cpu::or_a_n() {
@@ -1998,11 +2317,13 @@ void Cpu::or_a_n() {
   registers_.half_carry = 0;
   registers_.carry = 0;
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::rst_6() {
   push_onto_stack_reg_16(registers_.pc);
   registers_.pc = 0x30;
+  total_cycles_ += 4;
 }
 
 void Cpu::ld_hl_sp_n() {
@@ -2010,21 +2331,27 @@ void Cpu::ld_hl_sp_n() {
       registers_.sp +
       static_cast<int8_t>(memory_.read_byte(registers_.pc + 1)));
   registers_.pc += 2;
+  total_cycles_ += 3;
 }
 
 void Cpu::ld_sp_hl() {
   registers_.sp = registers_.hl;
   ++registers_.pc;
+  total_cycles_ += 2;
 }
 
 void Cpu::ld_a_nn_ref() {
   uint16_t imm_op = memory_.read_word(registers_.pc + 1);
   registers_.a = memory_.read_byte(imm_op);
   registers_.pc += 2;
+  total_cycles_ += 4;
 }
 
 // todo: finish this func
-void Cpu::e_i() { ++registers_.pc; }
+void Cpu::e_i() {
+  ++registers_.pc;
+  ++total_cycles_;
+}
 
 void Cpu::cp_a_n() {
   uint8_t imm_op = memory_.read_byte(registers_.pc + 1);
@@ -2035,11 +2362,13 @@ void Cpu::cp_a_n() {
   registers_.set_half_carry_flag_from_byte_result(registers_.a, comp, imm_op);
   registers_.set_carry_flag_from_byte_result(registers_.a, comp, imm_op);
   registers_.pc += 2;
+  total_cycles_ += 2;
 }
 
 void Cpu::rst_7() {
   push_onto_stack_reg_16(registers_.pc);
   registers_.pc = 0x38;
+  total_cycles_ += 4;
 }
 
 } // namespace Core

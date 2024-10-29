@@ -8,16 +8,20 @@
 namespace GameBoyEmu {
 namespace Core {
 
-enum class Instruction;
+enum class Instruction : uint8_t;
 
 class Cpu {
 public:
   Cpu();
+  Instruction fetch_current_instruction();
+  void execute_instruction(Instruction instruction);
 
 private:
+  static constexpr uint32_t TOTAL_NUMBER_OF_INSTRUCTION = 256;
   Registers registers_{};
   Memory memory_{};
-  std::array<std::function<void()>, 244> instructions_;
+  std::array<std::function<void()>, TOTAL_NUMBER_OF_INSTRUCTION> instructions_;
+  uint32_t total_cycles_{};
 
   void pop_stack_into_reg_16(uint16_t &reg);
   void push_onto_stack_reg_16(uint16_t content);
@@ -283,7 +287,7 @@ private:
   void rst_7();
 };
 
-enum class Instruction {
+enum class Instruction : uint8_t {
   Nop,
   LdBCNN,
   LdBCA,
@@ -499,7 +503,7 @@ enum class Instruction {
   RetZ,
   Ret,
   JpZNN,
-  CallZNN,
+  CallZNN = 0xCC,
   CallNN,
   AdcAN,
   Rst1,
@@ -507,40 +511,41 @@ enum class Instruction {
   RetNC,
   PopDE,
   JpNCNN,
-  CallNCNN,
+  CallNCNN = 0xD4,
   PushDE,
   SubAN,
   Rst2,
   RetC,
   Reti,
   JpCNN,
-  CallCNN,
-  SbcAN,
+  CallCNN = 0xDC,
+  SbcAN = 0xDE,
   Rst3,
 
   LdNRefA,
   PopHL,
   LdCRefA,
-  PushHL,
+  PushHL = 0xE5,
   AndAN,
   Rst4,
   AddSpN,
   JpHL,
   LdNNRefA,
-  XorAN,
+  XorAN = 0xEE,
   Rst5,
 
   LdANRef,
   PopAF,
   LdACRef,
-  PushAF,
+  DI,
+  PushAF = 0xF5,
   OrAN,
   Rst6,
   LdHLSPN,
   LdSPHL,
   LdANNRef,
   EI,
-  CpAN,
+  CpAN = 0xFE,
   Rst7,
 };
 
