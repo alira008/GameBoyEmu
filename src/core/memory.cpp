@@ -11,7 +11,9 @@ uint8_t Memory::read_byte(uint16_t addr) const {
 
 uint16_t Memory::read_word(uint16_t addr) const {
   assert(addr > 0 && addr < MAX_SPACE);
-  return (memory_space_[addr] << 8) | memory_space_[addr];
+  return static_cast<uint16_t>(static_cast<uint16_t>(memory_space_[addr])
+                               << 8) |
+         static_cast<uint16_t>(memory_space_[addr]);
 }
 
 void Memory::write_byte(uint16_t addr, uint8_t byte) {
