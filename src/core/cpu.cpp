@@ -279,15 +279,303 @@ Cpu::Cpu()
           nullptr,
           std::bind(&Cpu::cp_a_n, this),
           std::bind(&Cpu::rst_7, this),
-      } {}
+      }, instructions_16_bit{
+          std::bind(&Cpu::rlc_b, this),
+          std::bind(&Cpu::rlc_c, this),
+          std::bind(&Cpu::rlc_d, this),
+          std::bind(&Cpu::rlc_e, this),
+          std::bind(&Cpu::rlc_h, this),
+          std::bind(&Cpu::rlc_l, this),
+          std::bind(&Cpu::rlc_hl_ref, this),
+          std::bind(&Cpu::rlc_a, this),
+          std::bind(&Cpu::rrc_b, this),
+          std::bind(&Cpu::rrc_c, this),
+          std::bind(&Cpu::rrc_d, this),
+          std::bind(&Cpu::rrc_e, this),
+          std::bind(&Cpu::rrc_h, this),
+          std::bind(&Cpu::rrc_l, this),
+          std::bind(&Cpu::rrc_hl_ref, this),
+          std::bind(&Cpu::rrc_a, this),
 
-Instruction Cpu::fetch_current_instruction() {
+          std::bind(&Cpu::rl_b, this),
+          std::bind(&Cpu::rl_c, this),
+          std::bind(&Cpu::rl_d, this),
+          std::bind(&Cpu::rl_e, this),
+          std::bind(&Cpu::rl_h, this),
+          std::bind(&Cpu::rl_l, this),
+          std::bind(&Cpu::rl_hl_ref, this),
+          std::bind(&Cpu::rl_a, this),
+          std::bind(&Cpu::rr_b, this),
+          std::bind(&Cpu::rr_c, this),
+          std::bind(&Cpu::rr_d, this),
+          std::bind(&Cpu::rr_e, this),
+          std::bind(&Cpu::rr_h, this),
+          std::bind(&Cpu::rr_l, this),
+          std::bind(&Cpu::rr_hl_ref, this),
+          std::bind(&Cpu::rr_a, this),
+
+          std::bind(&Cpu::sla_b, this),
+          std::bind(&Cpu::sla_c, this),
+          std::bind(&Cpu::sla_d, this),
+          std::bind(&Cpu::sla_e, this),
+          std::bind(&Cpu::sla_h, this),
+          std::bind(&Cpu::sla_l, this),
+          std::bind(&Cpu::sla_hl_ref, this),
+          std::bind(&Cpu::sla_a, this),
+          std::bind(&Cpu::sra_b, this),
+          std::bind(&Cpu::sra_c, this),
+          std::bind(&Cpu::sra_d, this),
+          std::bind(&Cpu::sra_e, this),
+          std::bind(&Cpu::sra_h, this),
+          std::bind(&Cpu::sra_l, this),
+          std::bind(&Cpu::sra_hl_ref, this),
+          std::bind(&Cpu::sra_a, this),
+
+          std::bind(&Cpu::swap_b, this),
+          std::bind(&Cpu::swap_c, this),
+          std::bind(&Cpu::swap_d, this),
+          std::bind(&Cpu::swap_e, this),
+          std::bind(&Cpu::swap_h, this),
+          std::bind(&Cpu::swap_l, this),
+          std::bind(&Cpu::swap_hl_ref, this),
+          std::bind(&Cpu::swap_a, this),
+          std::bind(&Cpu::srl_b, this),
+          std::bind(&Cpu::srl_c, this),
+          std::bind(&Cpu::srl_d, this),
+          std::bind(&Cpu::srl_e, this),
+          std::bind(&Cpu::srl_h, this),
+          std::bind(&Cpu::srl_l, this),
+          std::bind(&Cpu::srl_hl_ref, this),
+          std::bind(&Cpu::srl_a, this),
+
+          std::bind(&Cpu::bit_0_b, this),
+          std::bind(&Cpu::bit_0_c, this),
+          std::bind(&Cpu::bit_0_d, this),
+          std::bind(&Cpu::bit_0_e, this),
+          std::bind(&Cpu::bit_0_h, this),
+          std::bind(&Cpu::bit_0_l, this),
+          std::bind(&Cpu::bit_0_hl_ref, this),
+          std::bind(&Cpu::bit_0_a, this),
+          std::bind(&Cpu::bit_1_b, this),
+          std::bind(&Cpu::bit_1_c, this),
+          std::bind(&Cpu::bit_1_d, this),
+          std::bind(&Cpu::bit_1_e, this),
+          std::bind(&Cpu::bit_1_h, this),
+          std::bind(&Cpu::bit_1_l, this),
+          std::bind(&Cpu::bit_1_hl_ref, this),
+          std::bind(&Cpu::bit_1_a, this),
+
+          std::bind(&Cpu::bit_2_b, this),
+          std::bind(&Cpu::bit_2_c, this),
+          std::bind(&Cpu::bit_2_d, this),
+          std::bind(&Cpu::bit_2_e, this),
+          std::bind(&Cpu::bit_2_h, this),
+          std::bind(&Cpu::bit_2_l, this),
+          std::bind(&Cpu::bit_2_hl_ref, this),
+          std::bind(&Cpu::bit_2_a, this),
+          std::bind(&Cpu::bit_3_b, this),
+          std::bind(&Cpu::bit_3_c, this),
+          std::bind(&Cpu::bit_3_d, this),
+          std::bind(&Cpu::bit_3_e, this),
+          std::bind(&Cpu::bit_3_h, this),
+          std::bind(&Cpu::bit_3_l, this),
+          std::bind(&Cpu::bit_3_hl_ref, this),
+          std::bind(&Cpu::bit_3_a, this),
+
+          std::bind(&Cpu::bit_4_b, this),
+          std::bind(&Cpu::bit_4_c, this),
+          std::bind(&Cpu::bit_4_d, this),
+          std::bind(&Cpu::bit_4_e, this),
+          std::bind(&Cpu::bit_4_h, this),
+          std::bind(&Cpu::bit_4_l, this),
+          std::bind(&Cpu::bit_4_hl_ref, this),
+          std::bind(&Cpu::bit_4_a, this),
+          std::bind(&Cpu::bit_5_b, this),
+          std::bind(&Cpu::bit_5_c, this),
+          std::bind(&Cpu::bit_5_d, this),
+          std::bind(&Cpu::bit_5_e, this),
+          std::bind(&Cpu::bit_5_h, this),
+          std::bind(&Cpu::bit_5_l, this),
+          std::bind(&Cpu::bit_5_hl_ref, this),
+          std::bind(&Cpu::bit_5_a, this),
+
+          std::bind(&Cpu::bit_6_b, this),
+          std::bind(&Cpu::bit_6_c, this),
+          std::bind(&Cpu::bit_6_d, this),
+          std::bind(&Cpu::bit_6_e, this),
+          std::bind(&Cpu::bit_6_h, this),
+          std::bind(&Cpu::bit_6_l, this),
+          std::bind(&Cpu::bit_6_hl_ref, this),
+          std::bind(&Cpu::bit_6_a, this),
+          std::bind(&Cpu::bit_7_b, this),
+          std::bind(&Cpu::bit_7_c, this),
+          std::bind(&Cpu::bit_7_d, this),
+          std::bind(&Cpu::bit_7_e, this),
+          std::bind(&Cpu::bit_7_h, this),
+          std::bind(&Cpu::bit_7_l, this),
+          std::bind(&Cpu::bit_7_hl_ref, this),
+          std::bind(&Cpu::bit_7_a, this),
+
+          std::bind(&Cpu::res_0_b, this),
+          std::bind(&Cpu::res_0_c, this),
+          std::bind(&Cpu::res_0_d, this),
+          std::bind(&Cpu::res_0_e, this),
+          std::bind(&Cpu::res_0_h, this),
+          std::bind(&Cpu::res_0_l, this),
+          std::bind(&Cpu::res_0_hl_ref, this),
+          std::bind(&Cpu::res_0_a, this),
+          std::bind(&Cpu::res_1_b, this),
+          std::bind(&Cpu::res_1_c, this),
+          std::bind(&Cpu::res_1_d, this),
+          std::bind(&Cpu::res_1_e, this),
+          std::bind(&Cpu::res_1_h, this),
+          std::bind(&Cpu::res_1_l, this),
+          std::bind(&Cpu::res_1_hl_ref, this),
+          std::bind(&Cpu::res_1_a, this),
+
+          std::bind(&Cpu::res_2_b, this),
+          std::bind(&Cpu::res_2_c, this),
+          std::bind(&Cpu::res_2_d, this),
+          std::bind(&Cpu::res_2_e, this),
+          std::bind(&Cpu::res_2_h, this),
+          std::bind(&Cpu::res_2_l, this),
+          std::bind(&Cpu::res_2_hl_ref, this),
+          std::bind(&Cpu::res_2_a, this),
+          std::bind(&Cpu::res_3_b, this),
+          std::bind(&Cpu::res_3_c, this),
+          std::bind(&Cpu::res_3_d, this),
+          std::bind(&Cpu::res_3_e, this),
+          std::bind(&Cpu::res_3_h, this),
+          std::bind(&Cpu::res_3_l, this),
+          std::bind(&Cpu::res_3_hl_ref, this),
+          std::bind(&Cpu::res_3_a, this),
+
+          std::bind(&Cpu::res_4_b, this),
+          std::bind(&Cpu::res_4_c, this),
+          std::bind(&Cpu::res_4_d, this),
+          std::bind(&Cpu::res_4_e, this),
+          std::bind(&Cpu::res_4_h, this),
+          std::bind(&Cpu::res_4_l, this),
+          std::bind(&Cpu::res_4_hl_ref, this),
+          std::bind(&Cpu::res_4_a, this),
+          std::bind(&Cpu::res_5_b, this),
+          std::bind(&Cpu::res_5_c, this),
+          std::bind(&Cpu::res_5_d, this),
+          std::bind(&Cpu::res_5_e, this),
+          std::bind(&Cpu::res_5_h, this),
+          std::bind(&Cpu::res_5_l, this),
+          std::bind(&Cpu::res_5_hl_ref, this),
+          std::bind(&Cpu::res_5_a, this),
+
+          std::bind(&Cpu::res_6_b, this),
+          std::bind(&Cpu::res_6_c, this),
+          std::bind(&Cpu::res_6_d, this),
+          std::bind(&Cpu::res_6_e, this),
+          std::bind(&Cpu::res_6_h, this),
+          std::bind(&Cpu::res_6_l, this),
+          std::bind(&Cpu::res_6_hl_ref, this),
+          std::bind(&Cpu::res_6_a, this),
+          std::bind(&Cpu::res_7_b, this),
+          std::bind(&Cpu::res_7_c, this),
+          std::bind(&Cpu::res_7_d, this),
+          std::bind(&Cpu::res_7_e, this),
+          std::bind(&Cpu::res_7_h, this),
+          std::bind(&Cpu::res_7_l, this),
+          std::bind(&Cpu::res_7_hl_ref, this),
+          std::bind(&Cpu::res_7_a, this),
+
+          std::bind(&Cpu::set_0_b, this),
+          std::bind(&Cpu::set_0_c, this),
+          std::bind(&Cpu::set_0_d, this),
+          std::bind(&Cpu::set_0_e, this),
+          std::bind(&Cpu::set_0_h, this),
+          std::bind(&Cpu::set_0_l, this),
+          std::bind(&Cpu::set_0_hl_ref, this),
+          std::bind(&Cpu::set_0_a, this),
+          std::bind(&Cpu::set_1_b, this),
+          std::bind(&Cpu::set_1_c, this),
+          std::bind(&Cpu::set_1_d, this),
+          std::bind(&Cpu::set_1_e, this),
+          std::bind(&Cpu::set_1_h, this),
+          std::bind(&Cpu::set_1_l, this),
+          std::bind(&Cpu::set_1_hl_ref, this),
+          std::bind(&Cpu::set_1_a, this),
+
+          std::bind(&Cpu::set_2_b, this),
+          std::bind(&Cpu::set_2_c, this),
+          std::bind(&Cpu::set_2_d, this),
+          std::bind(&Cpu::set_2_e, this),
+          std::bind(&Cpu::set_2_h, this),
+          std::bind(&Cpu::set_2_l, this),
+          std::bind(&Cpu::set_2_hl_ref, this),
+          std::bind(&Cpu::set_2_a, this),
+          std::bind(&Cpu::set_3_b, this),
+          std::bind(&Cpu::set_3_c, this),
+          std::bind(&Cpu::set_3_d, this),
+          std::bind(&Cpu::set_3_e, this),
+          std::bind(&Cpu::set_3_h, this),
+          std::bind(&Cpu::set_3_l, this),
+          std::bind(&Cpu::set_3_hl_ref, this),
+          std::bind(&Cpu::set_3_a, this),
+
+          std::bind(&Cpu::set_4_b, this),
+          std::bind(&Cpu::set_4_c, this),
+          std::bind(&Cpu::set_4_d, this),
+          std::bind(&Cpu::set_4_e, this),
+          std::bind(&Cpu::set_4_h, this),
+          std::bind(&Cpu::set_4_l, this),
+          std::bind(&Cpu::set_4_hl_ref, this),
+          std::bind(&Cpu::set_4_a, this),
+          std::bind(&Cpu::set_5_b, this),
+          std::bind(&Cpu::set_5_c, this),
+          std::bind(&Cpu::set_5_d, this),
+          std::bind(&Cpu::set_5_e, this),
+          std::bind(&Cpu::set_5_h, this),
+          std::bind(&Cpu::set_5_l, this),
+          std::bind(&Cpu::set_5_hl_ref, this),
+          std::bind(&Cpu::set_5_a, this),
+
+          std::bind(&Cpu::set_6_b, this),
+          std::bind(&Cpu::set_6_c, this),
+          std::bind(&Cpu::set_6_d, this),
+          std::bind(&Cpu::set_6_e, this),
+          std::bind(&Cpu::set_6_h, this),
+          std::bind(&Cpu::set_6_l, this),
+          std::bind(&Cpu::set_6_hl_ref, this),
+          std::bind(&Cpu::set_6_a, this),
+          std::bind(&Cpu::set_7_b, this),
+          std::bind(&Cpu::set_7_c, this),
+          std::bind(&Cpu::set_7_d, this),
+          std::bind(&Cpu::set_7_e, this),
+          std::bind(&Cpu::set_7_h, this),
+          std::bind(&Cpu::set_7_l, this),
+          std::bind(&Cpu::set_7_hl_ref, this),
+          std::bind(&Cpu::set_7_a, this),
+    } {}
+
+uint8_t Cpu::fetch_current_instruction() {
   uint8_t opcode = memory_.read_byte(registers_.pc);
 
   assert(opcode > 0 &&
          static_cast<uint32_t>(opcode) < TOTAL_NUMBER_OF_INSTRUCTION);
 
-  return static_cast<Instruction>(opcode);
+  return opcode;
+}
+
+void Cpu::execute_instruction(uint8_t opcode) {
+  // execute 16-bit opcodes
+  if (opcode == 0xCB) {
+    uint8_t new_opcode = memory_.read_byte(registers_.pc + 1);
+    if (new_opcode < instructions_16_bit.size() &&
+        instructions_16_bit[new_opcode]) {
+      instructions_16_bit[new_opcode]();
+    }
+  } // execute 8-bit opcodes
+  else if (opcode < instructions_.size() && instructions_[opcode]) {
+    instructions_[opcode]();
+  } else {
+    // todo: handle this case
+  }
 }
 
 void Cpu::inc_reg(uint8_t &reg) {
@@ -436,16 +724,6 @@ void Cpu::rst(uint8_t addr) {
   total_cycles_ += 4;
 }
 
-void Cpu::execute_instruction(Instruction instruction) {
-  size_t index = static_cast<size_t>(instruction);
-  if (index < instructions_.size() && instructions_[index]) {
-    // execute
-    instructions_[index]();
-  } else {
-    // todo: handle this case
-  }
-}
-
 void Cpu::pop_stack_into_reg_16(uint16_t &reg) {
   uint8_t sp_content = memory_.read_byte(registers_.sp);
   // load sp_content to lower order by of pc
@@ -463,6 +741,149 @@ void Cpu::push_onto_stack_reg_16(uint16_t content) {
   registers_.sp -= 2;
   memory_.write_word(registers_.sp, registers_.pc + 3);
   registers_.pc = content;
+}
+
+void Cpu::rlc(uint8_t &reg) {
+  uint8_t bit7 = (registers_.a & 0x80) >> 7;
+  reg = static_cast<uint8_t>(reg << 1) | bit7;
+  registers_.set_zero_flag_from_byte_result(reg);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit7;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+
+void Cpu::rrc(uint8_t &reg) {
+  uint8_t bit0 = reg & 0x1;
+  reg = (reg >> 1) | static_cast<uint8_t>(bit0 << 7);
+  registers_.set_zero_flag_from_byte_result(reg);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit0;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+
+void Cpu::rl(uint8_t &reg) {
+  uint8_t bit7 = (reg & 0x80) >> 7;
+  reg = static_cast<uint8_t>(reg << 1) | registers_.carry;
+  registers_.set_zero_flag_from_byte_result(reg);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit7;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+
+void Cpu::rr(uint8_t &reg) {
+  uint8_t bit0 = reg & 0x1;
+  reg = (reg >> 1) | static_cast<uint8_t>(registers_.carry << 7);
+  registers_.set_zero_flag_from_byte_result(reg);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit0;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+
+void Cpu::sla(uint8_t &reg) {
+  uint8_t bit7 = (reg & 0x80) >> 7;
+  reg = static_cast<uint8_t>(reg << 1);
+  registers_.set_zero_flag_from_byte_result(reg);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit7;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+
+void Cpu::sra(uint8_t &reg) {
+  uint8_t bit0 = reg & 0x1;
+  uint8_t bit7 = reg & 0x80;
+  reg = (reg >> 1) | bit7;
+  registers_.set_zero_flag_from_byte_result(reg);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit0;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+
+void Cpu::swap(uint8_t &reg) {
+  uint8_t lower_bits = static_cast<uint8_t>((reg & 0xF) << 4);
+  uint8_t upper_bits = (reg & 0xF0) >> 4;
+  reg = lower_bits | upper_bits;
+  registers_.set_zero_flag_from_byte_result(reg);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = 0;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+
+void Cpu::srl(uint8_t &reg) {
+  uint8_t bit0 = reg & 0x1;
+  reg >>= 1;
+  registers_.set_zero_flag_from_byte_result(reg);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit0;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+
+void Cpu::bit(uint8_t &reg, uint8_t bit) {
+  if (!((reg >> bit) & 0x1)) {
+    registers_.zero = 1;
+  } else {
+    registers_.zero = 0;
+  }
+  registers_.subtract = 0;
+  registers_.half_carry = 1;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+
+void Cpu::bit_hl_ref(uint8_t bit) {
+  uint8_t ref_byte = memory_.read_byte(registers_.hl);
+  if (!((ref_byte >> bit) & 0x1)) {
+    registers_.zero = 1;
+  } else {
+    registers_.zero = 0;
+  }
+  registers_.subtract = 0;
+  registers_.half_carry = 1;
+  registers_.pc += 2;
+  total_cycles_ += 3;
+}
+
+void Cpu::res(uint8_t &reg, uint8_t bit) {
+  reg &= ~(0x1 << bit);
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+
+void Cpu::res_hl_ref(uint8_t bit) {
+  uint8_t ref_byte = memory_.read_byte(registers_.hl);
+  uint8_t result = ref_byte & ~(0x1 << bit);
+  memory_.write_byte(registers_.hl, result);
+  registers_.pc += 2;
+  total_cycles_ += 4;
+}
+
+void Cpu::set(uint8_t &reg, uint8_t bit) {
+  reg |= (0x1 << bit);
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+
+void Cpu::set_hl_ref(uint8_t bit) {
+  uint8_t ref_byte = memory_.read_byte(registers_.hl);
+  uint8_t result = ref_byte | static_cast<uint8_t>(0x1 << bit);
+  memory_.write_byte(registers_.hl, result);
+  registers_.pc += 2;
+  total_cycles_ += 4;
 }
 
 void Cpu::nop() {
@@ -486,7 +907,7 @@ void Cpu::dec_b() { dec_reg(registers_.b); }
 void Cpu::ld_b_n() { ld_reg_n(registers_.b); }
 
 void Cpu::rlca() {
-  uint8_t bit7 = (registers_.a & 0x8) >> 7;
+  uint8_t bit7 = (registers_.a & 0x80) >> 7;
   registers_.a = static_cast<uint8_t>(registers_.a << 1) | bit7;
   registers_.zero = 0;
   registers_.subtract = 0;
@@ -564,7 +985,7 @@ void Cpu::dec_d() { dec_reg(registers_.d); }
 void Cpu::ld_d_n() { ld_reg_n(registers_.d); }
 
 void Cpu::rla() {
-  uint8_t bit7 = (registers_.a & 0x8) >> 7;
+  uint8_t bit7 = (registers_.a & 0x80) >> 7;
   registers_.a = static_cast<uint8_t>(registers_.a << 1) | registers_.carry;
   registers_.zero = 0;
   registers_.subtract = 0;
@@ -1469,6 +1890,385 @@ void Cpu::cp_a_n() {
 }
 
 void Cpu::rst_7() { rst(0x38); }
+
+void Cpu::rlc_b() { rlc(registers_.b); }
+void Cpu::rlc_c() { rlc(registers_.c); }
+void Cpu::rlc_d() { rlc(registers_.d); }
+void Cpu::rlc_e() { rlc(registers_.e); }
+void Cpu::rlc_h() { rlc(registers_.h); }
+void Cpu::rlc_l() { rlc(registers_.l); }
+void Cpu::rlc_hl_ref() {
+  uint8_t ref_byte = memory_.read_byte(registers_.hl);
+  uint8_t bit7 = (ref_byte & 0x8) >> 7;
+  uint8_t result = static_cast<uint8_t>(ref_byte << 1) | bit7;
+  memory_.write_byte(registers_.hl, result);
+  registers_.set_zero_flag_from_byte_result(result);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit7;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+void Cpu::rlc_a() { rlc(registers_.a); }
+
+void Cpu::rrc_b() { rrc(registers_.b); }
+void Cpu::rrc_c() { rrc(registers_.c); }
+void Cpu::rrc_d() { rrc(registers_.d); }
+void Cpu::rrc_e() { rrc(registers_.e); }
+void Cpu::rrc_h() { rrc(registers_.h); }
+void Cpu::rrc_l() { rrc(registers_.l); }
+void Cpu::rrc_hl_ref() {
+  uint8_t ref_byte = memory_.read_byte(registers_.hl);
+  uint8_t bit0 = ref_byte & 0x1;
+  uint8_t result = (ref_byte >> 1) | static_cast<uint8_t>(bit0 << 7);
+  memory_.write_byte(registers_.hl, result);
+  registers_.set_zero_flag_from_byte_result(result);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit0;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+void Cpu::rrc_a() { rrc(registers_.a); }
+
+void Cpu::rl_b() { rl(registers_.b); }
+void Cpu::rl_c() { rl(registers_.c); }
+void Cpu::rl_d() { rl(registers_.d); }
+void Cpu::rl_e() { rl(registers_.e); }
+void Cpu::rl_h() { rl(registers_.h); }
+void Cpu::rl_l() { rl(registers_.l); }
+void Cpu::rl_hl_ref() {
+  uint8_t ref_byte = memory_.read_byte(registers_.hl);
+  uint8_t bit7 = (ref_byte & 0x8) >> 7;
+  uint8_t result = static_cast<uint8_t>(ref_byte << 1) | registers_.carry;
+  memory_.write_byte(registers_.hl, result);
+  registers_.set_zero_flag_from_byte_result(result);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit7;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+void Cpu::rl_a() { rl(registers_.a); }
+
+void Cpu::rr_b() { rr(registers_.b); }
+void Cpu::rr_c() { rr(registers_.c); }
+void Cpu::rr_d() { rr(registers_.d); }
+void Cpu::rr_e() { rr(registers_.e); }
+void Cpu::rr_h() { rr(registers_.h); }
+void Cpu::rr_l() { rr(registers_.l); }
+void Cpu::rr_hl_ref() {
+  uint8_t ref_byte = memory_.read_byte(registers_.hl);
+  uint8_t bit0 = ref_byte & 0x1;
+  uint8_t result =
+      (ref_byte >> 1) | static_cast<uint8_t>(registers_.carry << 7);
+  memory_.write_byte(registers_.hl, result);
+  registers_.set_zero_flag_from_byte_result(ref_byte);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit0;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+void Cpu::rr_a() { rr(registers_.a); }
+
+void Cpu::sla_b() { sla(registers_.b); }
+void Cpu::sla_c() { sla(registers_.c); }
+void Cpu::sla_d() { sla(registers_.d); }
+void Cpu::sla_e() { sla(registers_.e); }
+void Cpu::sla_h() { sla(registers_.h); }
+void Cpu::sla_l() { sla(registers_.l); }
+void Cpu::sla_hl_ref() {
+  uint8_t ref_byte = memory_.read_byte(registers_.hl);
+  uint8_t bit7 = (ref_byte & 0x8) >> 7;
+  uint8_t result = static_cast<uint8_t>(ref_byte << 1);
+  memory_.write_byte(registers_.hl, result);
+  registers_.set_zero_flag_from_byte_result(result);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit7;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+void Cpu::sla_a() { sla(registers_.a); }
+
+void Cpu::sra_b() { sra(registers_.b); }
+void Cpu::sra_c() { sra(registers_.c); }
+void Cpu::sra_d() { sra(registers_.d); }
+void Cpu::sra_e() { sra(registers_.e); }
+void Cpu::sra_h() { sra(registers_.h); }
+void Cpu::sra_l() { sra(registers_.l); }
+void Cpu::sra_hl_ref() {
+  uint8_t ref_byte = memory_.read_byte(registers_.hl);
+  uint8_t bit0 = ref_byte & 0x1;
+  uint8_t bit7 = ref_byte & 0x80;
+  uint8_t result = (ref_byte >> 1) | bit7;
+  memory_.write_byte(registers_.hl, result);
+  registers_.set_zero_flag_from_byte_result(result);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit0;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+void Cpu::sra_a() { sra(registers_.a); }
+
+void Cpu::swap_b() { swap(registers_.b); }
+void Cpu::swap_c() { swap(registers_.c); }
+void Cpu::swap_d() { swap(registers_.d); }
+void Cpu::swap_e() { swap(registers_.e); }
+void Cpu::swap_h() { swap(registers_.h); }
+void Cpu::swap_l() { swap(registers_.l); }
+void Cpu::swap_hl_ref() {
+  uint8_t ref_byte = memory_.read_byte(registers_.hl);
+  uint8_t lower_bits = static_cast<uint8_t>((ref_byte & 0xF) << 4);
+  uint8_t upper_bits = (ref_byte & 0xF0) >> 4;
+  uint8_t result = lower_bits | upper_bits;
+  memory_.write_byte(registers_.hl, result);
+  registers_.set_zero_flag_from_byte_result(result);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = 0;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+void Cpu::swap_a() { swap(registers_.a); }
+
+void Cpu::srl_b() { srl(registers_.b); }
+void Cpu::srl_c() { srl(registers_.c); }
+void Cpu::srl_d() { srl(registers_.d); }
+void Cpu::srl_e() { srl(registers_.e); }
+void Cpu::srl_h() { srl(registers_.h); }
+void Cpu::srl_l() { srl(registers_.l); }
+void Cpu::srl_hl_ref() {
+  uint8_t ref_byte = memory_.read_byte(registers_.hl);
+  uint8_t bit0 = ref_byte & 0x1;
+  uint8_t result = static_cast<uint8_t>(ref_byte >> 1);
+  memory_.write_byte(registers_.hl, result);
+  registers_.set_zero_flag_from_byte_result(result);
+  registers_.subtract = 0;
+  registers_.half_carry = 0;
+  registers_.carry = bit0;
+  registers_.pc += 2;
+  total_cycles_ += 2;
+}
+void Cpu::srl_a() { srl(registers_.a); }
+
+void Cpu::bit_0_b() { bit(registers_.b, 0); }
+void Cpu::bit_0_c() { bit(registers_.c, 0); }
+void Cpu::bit_0_d() { bit(registers_.d, 0); }
+void Cpu::bit_0_e() { bit(registers_.e, 0); }
+void Cpu::bit_0_h() { bit(registers_.h, 0); }
+void Cpu::bit_0_l() { bit(registers_.l, 0); }
+void Cpu::bit_0_hl_ref() { bit_hl_ref(0); }
+void Cpu::bit_0_a() { bit(registers_.a, 0); }
+
+void Cpu::bit_1_b() { bit(registers_.b, 1); }
+void Cpu::bit_1_c() { bit(registers_.c, 1); }
+void Cpu::bit_1_d() { bit(registers_.d, 1); }
+void Cpu::bit_1_e() { bit(registers_.e, 1); }
+void Cpu::bit_1_h() { bit(registers_.h, 1); }
+void Cpu::bit_1_l() { bit(registers_.l, 1); }
+void Cpu::bit_1_hl_ref() { bit_hl_ref(1); }
+void Cpu::bit_1_a() { bit(registers_.a, 1); }
+
+void Cpu::bit_2_b() { bit(registers_.b, 2); }
+void Cpu::bit_2_c() { bit(registers_.c, 2); }
+void Cpu::bit_2_d() { bit(registers_.d, 2); }
+void Cpu::bit_2_e() { bit(registers_.e, 2); }
+void Cpu::bit_2_h() { bit(registers_.h, 2); }
+void Cpu::bit_2_l() { bit(registers_.l, 2); }
+void Cpu::bit_2_hl_ref() { bit_hl_ref(2); }
+void Cpu::bit_2_a() { bit(registers_.a, 2); }
+
+void Cpu::bit_3_b() { bit(registers_.b, 3); }
+void Cpu::bit_3_c() { bit(registers_.c, 3); }
+void Cpu::bit_3_d() { bit(registers_.d, 3); }
+void Cpu::bit_3_e() { bit(registers_.e, 3); }
+void Cpu::bit_3_h() { bit(registers_.h, 3); }
+void Cpu::bit_3_l() { bit(registers_.l, 3); }
+void Cpu::bit_3_hl_ref() { bit_hl_ref(3); }
+void Cpu::bit_3_a() { bit(registers_.a, 3); }
+
+void Cpu::bit_4_b() { bit(registers_.b, 4); }
+void Cpu::bit_4_c() { bit(registers_.c, 4); }
+void Cpu::bit_4_d() { bit(registers_.d, 4); }
+void Cpu::bit_4_e() { bit(registers_.e, 4); }
+void Cpu::bit_4_h() { bit(registers_.h, 4); }
+void Cpu::bit_4_l() { bit(registers_.l, 4); }
+void Cpu::bit_4_hl_ref() { bit_hl_ref(4); }
+void Cpu::bit_4_a() { bit(registers_.a, 4); }
+
+void Cpu::bit_5_b() { bit(registers_.b, 5); }
+void Cpu::bit_5_c() { bit(registers_.c, 5); }
+void Cpu::bit_5_d() { bit(registers_.d, 5); }
+void Cpu::bit_5_e() { bit(registers_.e, 5); }
+void Cpu::bit_5_h() { bit(registers_.h, 5); }
+void Cpu::bit_5_l() { bit(registers_.l, 5); }
+void Cpu::bit_5_hl_ref() { bit_hl_ref(5); }
+void Cpu::bit_5_a() { bit(registers_.a, 5); }
+
+void Cpu::bit_6_b() { bit(registers_.b, 6); }
+void Cpu::bit_6_c() { bit(registers_.c, 6); }
+void Cpu::bit_6_d() { bit(registers_.d, 6); }
+void Cpu::bit_6_e() { bit(registers_.e, 6); }
+void Cpu::bit_6_h() { bit(registers_.h, 6); }
+void Cpu::bit_6_l() { bit(registers_.l, 6); }
+void Cpu::bit_6_hl_ref() { bit_hl_ref(6); }
+void Cpu::bit_6_a() { bit(registers_.a, 6); }
+
+void Cpu::bit_7_b() { bit(registers_.b, 7); }
+void Cpu::bit_7_c() { bit(registers_.c, 7); }
+void Cpu::bit_7_d() { bit(registers_.d, 7); }
+void Cpu::bit_7_e() { bit(registers_.e, 7); }
+void Cpu::bit_7_h() { bit(registers_.h, 7); }
+void Cpu::bit_7_l() { bit(registers_.l, 7); }
+void Cpu::bit_7_hl_ref() { bit_hl_ref(7); }
+void Cpu::bit_7_a() { bit(registers_.a, 7); }
+
+void Cpu::res_0_b() { res(registers_.b, 0); }
+void Cpu::res_0_c() { res(registers_.c, 0); }
+void Cpu::res_0_d() { res(registers_.d, 0); }
+void Cpu::res_0_e() { res(registers_.e, 0); }
+void Cpu::res_0_h() { res(registers_.h, 0); }
+void Cpu::res_0_l() { res(registers_.l, 0); }
+void Cpu::res_0_hl_ref() { res_hl_ref(0); }
+void Cpu::res_0_a() { res(registers_.a, 0); }
+
+void Cpu::res_1_b() { res(registers_.b, 1); }
+void Cpu::res_1_c() { res(registers_.c, 1); }
+void Cpu::res_1_d() { res(registers_.d, 1); }
+void Cpu::res_1_e() { res(registers_.e, 1); }
+void Cpu::res_1_h() { res(registers_.h, 1); }
+void Cpu::res_1_l() { res(registers_.l, 1); }
+void Cpu::res_1_hl_ref() { res_hl_ref(1); }
+void Cpu::res_1_a() { res(registers_.a, 1); }
+
+void Cpu::res_2_b() { res(registers_.b, 2); }
+void Cpu::res_2_c() { res(registers_.c, 2); }
+void Cpu::res_2_d() { res(registers_.d, 2); }
+void Cpu::res_2_e() { res(registers_.e, 2); }
+void Cpu::res_2_h() { res(registers_.h, 2); }
+void Cpu::res_2_l() { res(registers_.l, 2); }
+void Cpu::res_2_hl_ref() { res_hl_ref(2); }
+void Cpu::res_2_a() { res(registers_.a, 2); }
+
+void Cpu::res_3_b() { res(registers_.b, 3); }
+void Cpu::res_3_c() { res(registers_.c, 3); }
+void Cpu::res_3_d() { res(registers_.d, 3); }
+void Cpu::res_3_e() { res(registers_.e, 3); }
+void Cpu::res_3_h() { res(registers_.h, 3); }
+void Cpu::res_3_l() { res(registers_.l, 3); }
+void Cpu::res_3_hl_ref() { res_hl_ref(3); }
+void Cpu::res_3_a() { res(registers_.a, 3); }
+
+void Cpu::res_4_b() { res(registers_.b, 4); }
+void Cpu::res_4_c() { res(registers_.c, 4); }
+void Cpu::res_4_d() { res(registers_.d, 4); }
+void Cpu::res_4_e() { res(registers_.e, 4); }
+void Cpu::res_4_h() { res(registers_.h, 4); }
+void Cpu::res_4_l() { res(registers_.l, 4); }
+void Cpu::res_4_hl_ref() { res_hl_ref(4); }
+void Cpu::res_4_a() { res(registers_.a, 4); }
+
+void Cpu::res_5_b() { res(registers_.b, 5); }
+void Cpu::res_5_c() { res(registers_.c, 5); }
+void Cpu::res_5_d() { res(registers_.d, 5); }
+void Cpu::res_5_e() { res(registers_.e, 5); }
+void Cpu::res_5_h() { res(registers_.h, 5); }
+void Cpu::res_5_l() { res(registers_.l, 5); }
+void Cpu::res_5_hl_ref() { res_hl_ref(5); }
+void Cpu::res_5_a() { res(registers_.a, 5); }
+
+void Cpu::res_6_b() { res(registers_.b, 6); }
+void Cpu::res_6_c() { res(registers_.c, 6); }
+void Cpu::res_6_d() { res(registers_.d, 6); }
+void Cpu::res_6_e() { res(registers_.e, 6); }
+void Cpu::res_6_h() { res(registers_.h, 6); }
+void Cpu::res_6_l() { res(registers_.l, 6); }
+void Cpu::res_6_hl_ref() { res_hl_ref(6); }
+void Cpu::res_6_a() { res(registers_.a, 6); }
+
+void Cpu::res_7_b() { res(registers_.b, 7); }
+void Cpu::res_7_c() { res(registers_.c, 7); }
+void Cpu::res_7_d() { res(registers_.d, 7); }
+void Cpu::res_7_e() { res(registers_.e, 7); }
+void Cpu::res_7_h() { res(registers_.h, 7); }
+void Cpu::res_7_l() { res(registers_.l, 7); }
+void Cpu::res_7_hl_ref() { res_hl_ref(7); }
+void Cpu::res_7_a() { res(registers_.a, 7); }
+
+void Cpu::set_0_b() { set(registers_.b, 0); }
+void Cpu::set_0_c() { set(registers_.c, 0); }
+void Cpu::set_0_d() { set(registers_.d, 0); }
+void Cpu::set_0_e() { set(registers_.e, 0); }
+void Cpu::set_0_h() { set(registers_.h, 0); }
+void Cpu::set_0_l() { set(registers_.l, 0); }
+void Cpu::set_0_hl_ref() { set_hl_ref(0); }
+void Cpu::set_0_a() { set(registers_.a, 0); }
+
+void Cpu::set_1_b() { set(registers_.b, 1); }
+void Cpu::set_1_c() { set(registers_.c, 1); }
+void Cpu::set_1_d() { set(registers_.d, 1); }
+void Cpu::set_1_e() { set(registers_.e, 1); }
+void Cpu::set_1_h() { set(registers_.h, 1); }
+void Cpu::set_1_l() { set(registers_.l, 1); }
+void Cpu::set_1_hl_ref() { set_hl_ref(1); }
+void Cpu::set_1_a() { set(registers_.a, 1); }
+
+void Cpu::set_2_b() { set(registers_.b, 2); }
+void Cpu::set_2_c() { set(registers_.c, 2); }
+void Cpu::set_2_d() { set(registers_.d, 2); }
+void Cpu::set_2_e() { set(registers_.e, 2); }
+void Cpu::set_2_h() { set(registers_.h, 2); }
+void Cpu::set_2_l() { set(registers_.l, 2); }
+void Cpu::set_2_hl_ref() { set_hl_ref(2); }
+void Cpu::set_2_a() { set(registers_.a, 2); }
+
+void Cpu::set_3_b() { set(registers_.b, 3); }
+void Cpu::set_3_c() { set(registers_.c, 3); }
+void Cpu::set_3_d() { set(registers_.d, 3); }
+void Cpu::set_3_e() { set(registers_.e, 3); }
+void Cpu::set_3_h() { set(registers_.h, 3); }
+void Cpu::set_3_l() { set(registers_.l, 3); }
+void Cpu::set_3_hl_ref() { set_hl_ref(3); }
+void Cpu::set_3_a() { set(registers_.a, 3); }
+
+void Cpu::set_4_b() { set(registers_.b, 4); }
+void Cpu::set_4_c() { set(registers_.c, 4); }
+void Cpu::set_4_d() { set(registers_.d, 4); }
+void Cpu::set_4_e() { set(registers_.e, 4); }
+void Cpu::set_4_h() { set(registers_.h, 4); }
+void Cpu::set_4_l() { set(registers_.l, 4); }
+void Cpu::set_4_hl_ref() { set_hl_ref(4); }
+void Cpu::set_4_a() { set(registers_.a, 4); }
+
+void Cpu::set_5_b() { set(registers_.b, 5); }
+void Cpu::set_5_c() { set(registers_.c, 5); }
+void Cpu::set_5_d() { set(registers_.d, 5); }
+void Cpu::set_5_e() { set(registers_.e, 5); }
+void Cpu::set_5_h() { set(registers_.h, 5); }
+void Cpu::set_5_l() { set(registers_.l, 5); }
+void Cpu::set_5_hl_ref() { set_hl_ref(5); }
+void Cpu::set_5_a() { set(registers_.a, 5); }
+
+void Cpu::set_6_b() { set(registers_.b, 6); }
+void Cpu::set_6_c() { set(registers_.c, 6); }
+void Cpu::set_6_d() { set(registers_.d, 6); }
+void Cpu::set_6_e() { set(registers_.e, 6); }
+void Cpu::set_6_h() { set(registers_.h, 6); }
+void Cpu::set_6_l() { set(registers_.l, 6); }
+void Cpu::set_6_hl_ref() { set_hl_ref(6); }
+void Cpu::set_6_a() { set(registers_.a, 6); }
+
+void Cpu::set_7_b() { set(registers_.b, 7); }
+void Cpu::set_7_c() { set(registers_.c, 7); }
+void Cpu::set_7_d() { set(registers_.d, 7); }
+void Cpu::set_7_e() { set(registers_.e, 7); }
+void Cpu::set_7_h() { set(registers_.h, 7); }
+void Cpu::set_7_l() { set(registers_.l, 7); }
+void Cpu::set_7_hl_ref() { set_hl_ref(7); }
+void Cpu::set_7_a() { set(registers_.a, 7); }
 
 } // namespace Core
 } // namespace GameBoyEmu

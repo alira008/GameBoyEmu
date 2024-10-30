@@ -9,38 +9,56 @@ namespace GameBoyEmu {
 namespace Core {
 
 enum class Instruction : uint8_t;
+enum class Instruction16Bit : uint8_t;
+
+enum class AdressingMode { Immediate, Reference };
 
 class Cpu {
 public:
   Cpu();
-  Instruction fetch_current_instruction();
-  void execute_instruction(Instruction instruction);
+  uint8_t fetch_current_instruction();
+  void execute_instruction(uint8_t opcode);
 
 private:
   static constexpr uint32_t TOTAL_NUMBER_OF_INSTRUCTION = 256;
   Registers registers_{};
   Memory memory_{};
   std::array<std::function<void()>, TOTAL_NUMBER_OF_INSTRUCTION> instructions_;
+  std::array<std::function<void()>, TOTAL_NUMBER_OF_INSTRUCTION> instructions_16_bit;
   uint32_t total_cycles_{};
 
   void inc_reg(uint8_t &reg);
   void dec_reg(uint8_t &reg);
   void inc_word_reg(uint16_t &reg);
   void dec_word_reg(uint16_t &reg);
-  void ld_reg_n(uint8_t& reg);
-  void ld_reg_reg(uint8_t& write_reg, uint8_t read_reg);
-  void ld_word_reg_nn(uint16_t& reg);
-  void add_reg_reg(uint8_t& write_reg, uint8_t read_reg);
-  void adc_reg_reg(uint8_t& write_reg, uint8_t read_reg);
-  void sub_reg_reg(uint8_t& write_reg, uint8_t read_reg);
-  void sbc_reg_reg(uint8_t& write_reg, uint8_t read_reg);
-  void and_reg_reg(uint8_t& write_reg, uint8_t read_reg);
-  void xor_reg_reg(uint8_t& write_reg, uint8_t read_reg);
-  void or_reg_reg(uint8_t& write_reg, uint8_t read_reg);
-  void cp_reg_reg(uint8_t& write_reg, uint8_t read_reg);
+  void ld_reg_n(uint8_t &reg);
+  void ld_reg_reg(uint8_t &write_reg, uint8_t read_reg);
+  void ld_word_reg_nn(uint16_t &reg);
+  void add_reg_reg(uint8_t &write_reg, uint8_t read_reg);
+  void adc_reg_reg(uint8_t &write_reg, uint8_t read_reg);
+  void sub_reg_reg(uint8_t &write_reg, uint8_t read_reg);
+  void sbc_reg_reg(uint8_t &write_reg, uint8_t read_reg);
+  void and_reg_reg(uint8_t &write_reg, uint8_t read_reg);
+  void xor_reg_reg(uint8_t &write_reg, uint8_t read_reg);
+  void or_reg_reg(uint8_t &write_reg, uint8_t read_reg);
+  void cp_reg_reg(uint8_t &write_reg, uint8_t read_reg);
   void rst(uint8_t addr);
   void pop_stack_into_reg_16(uint16_t &reg);
   void push_onto_stack_reg_16(uint16_t content);
+  void rlc(uint8_t &reg);
+  void rrc(uint8_t &reg);
+  void rl(uint8_t &reg);
+  void rr(uint8_t &reg);
+  void sla(uint8_t &reg);
+  void sra(uint8_t &reg);
+  void swap(uint8_t &reg);
+  void srl(uint8_t &reg);
+  void bit(uint8_t &reg, uint8_t bit);
+  void bit_hl_ref(uint8_t bit);
+  void res(uint8_t &reg, uint8_t bit);
+  void res_hl_ref(uint8_t bit);
+  void set(uint8_t &reg, uint8_t bit);
+  void set_hl_ref(uint8_t bit);
   /* instruction set */
   void nop();
   void ld_bc_nn();
@@ -301,6 +319,279 @@ private:
   void e_i();
   void cp_a_n();
   void rst_7();
+
+  // 16-bit opcode instructions
+  void rlc_b();
+  void rlc_c();
+  void rlc_d();
+  void rlc_e();
+  void rlc_h();
+  void rlc_l();
+  void rlc_hl_ref();
+  void rlc_a();
+  void rrc_b();
+  void rrc_c();
+  void rrc_d();
+  void rrc_e();
+  void rrc_h();
+  void rrc_l();
+  void rrc_hl_ref();
+  void rrc_a();
+
+  void rl_b();
+  void rl_c();
+  void rl_d();
+  void rl_e();
+  void rl_h();
+  void rl_l();
+  void rl_hl_ref();
+  void rl_a();
+  void rr_b();
+  void rr_c();
+  void rr_d();
+  void rr_e();
+  void rr_h();
+  void rr_l();
+  void rr_hl_ref();
+  void rr_a();
+
+  void sla_b();
+  void sla_c();
+  void sla_d();
+  void sla_e();
+  void sla_h();
+  void sla_l();
+  void sla_hl_ref();
+  void sla_a();
+  void sra_b();
+  void sra_c();
+  void sra_d();
+  void sra_e();
+  void sra_h();
+  void sra_l();
+  void sra_hl_ref();
+  void sra_a();
+
+  void swap_b();
+  void swap_c();
+  void swap_d();
+  void swap_e();
+  void swap_h();
+  void swap_l();
+  void swap_hl_ref();
+  void swap_a();
+  void srl_b();
+  void srl_c();
+  void srl_d();
+  void srl_e();
+  void srl_h();
+  void srl_l();
+  void srl_hl_ref();
+  void srl_a();
+
+  void bit_0_b();
+  void bit_0_c();
+  void bit_0_d();
+  void bit_0_e();
+  void bit_0_h();
+  void bit_0_l();
+  void bit_0_hl_ref();
+  void bit_0_a();
+  void bit_1_b();
+  void bit_1_c();
+  void bit_1_d();
+  void bit_1_e();
+  void bit_1_h();
+  void bit_1_l();
+  void bit_1_hl_ref();
+  void bit_1_a();
+
+  void bit_2_b();
+  void bit_2_c();
+  void bit_2_d();
+  void bit_2_e();
+  void bit_2_h();
+  void bit_2_l();
+  void bit_2_hl_ref();
+  void bit_2_a();
+  void bit_3_b();
+  void bit_3_c();
+  void bit_3_d();
+  void bit_3_e();
+  void bit_3_h();
+  void bit_3_l();
+  void bit_3_hl_ref();
+  void bit_3_a();
+
+  void bit_4_b();
+  void bit_4_c();
+  void bit_4_d();
+  void bit_4_e();
+  void bit_4_h();
+  void bit_4_l();
+  void bit_4_hl_ref();
+  void bit_4_a();
+  void bit_5_b();
+  void bit_5_c();
+  void bit_5_d();
+  void bit_5_e();
+  void bit_5_h();
+  void bit_5_l();
+  void bit_5_hl_ref();
+  void bit_5_a();
+
+  void bit_6_b();
+  void bit_6_c();
+  void bit_6_d();
+  void bit_6_e();
+  void bit_6_h();
+  void bit_6_l();
+  void bit_6_hl_ref();
+  void bit_6_a();
+  void bit_7_b();
+  void bit_7_c();
+  void bit_7_d();
+  void bit_7_e();
+  void bit_7_h();
+  void bit_7_l();
+  void bit_7_hl_ref();
+  void bit_7_a();
+
+  void res_0_b();
+  void res_0_c();
+  void res_0_d();
+  void res_0_e();
+  void res_0_h();
+  void res_0_l();
+  void res_0_hl_ref();
+  void res_0_a();
+  void res_1_b();
+  void res_1_c();
+  void res_1_d();
+  void res_1_e();
+  void res_1_h();
+  void res_1_l();
+  void res_1_hl_ref();
+  void res_1_a();
+
+  void res_2_b();
+  void res_2_c();
+  void res_2_d();
+  void res_2_e();
+  void res_2_h();
+  void res_2_l();
+  void res_2_hl_ref();
+  void res_2_a();
+  void res_3_b();
+  void res_3_c();
+  void res_3_d();
+  void res_3_e();
+  void res_3_h();
+  void res_3_l();
+  void res_3_hl_ref();
+  void res_3_a();
+
+  void res_4_b();
+  void res_4_c();
+  void res_4_d();
+  void res_4_e();
+  void res_4_h();
+  void res_4_l();
+  void res_4_hl_ref();
+  void res_4_a();
+  void res_5_b();
+  void res_5_c();
+  void res_5_d();
+  void res_5_e();
+  void res_5_h();
+  void res_5_l();
+  void res_5_hl_ref();
+  void res_5_a();
+
+  void res_6_b();
+  void res_6_c();
+  void res_6_d();
+  void res_6_e();
+  void res_6_h();
+  void res_6_l();
+  void res_6_hl_ref();
+  void res_6_a();
+  void res_7_b();
+  void res_7_c();
+  void res_7_d();
+  void res_7_e();
+  void res_7_h();
+  void res_7_l();
+  void res_7_hl_ref();
+  void res_7_a();
+
+  void set_0_b();
+  void set_0_c();
+  void set_0_d();
+  void set_0_e();
+  void set_0_h();
+  void set_0_l();
+  void set_0_hl_ref();
+  void set_0_a();
+  void set_1_b();
+  void set_1_c();
+  void set_1_d();
+  void set_1_e();
+  void set_1_h();
+  void set_1_l();
+  void set_1_hl_ref();
+  void set_1_a();
+
+  void set_2_b();
+  void set_2_c();
+  void set_2_d();
+  void set_2_e();
+  void set_2_h();
+  void set_2_l();
+  void set_2_hl_ref();
+  void set_2_a();
+  void set_3_b();
+  void set_3_c();
+  void set_3_d();
+  void set_3_e();
+  void set_3_h();
+  void set_3_l();
+  void set_3_hl_ref();
+  void set_3_a();
+
+  void set_4_b();
+  void set_4_c();
+  void set_4_d();
+  void set_4_e();
+  void set_4_h();
+  void set_4_l();
+  void set_4_hl_ref();
+  void set_4_a();
+  void set_5_b();
+  void set_5_c();
+  void set_5_d();
+  void set_5_e();
+  void set_5_h();
+  void set_5_l();
+  void set_5_hl_ref();
+  void set_5_a();
+
+  void set_6_b();
+  void set_6_c();
+  void set_6_d();
+  void set_6_e();
+  void set_6_h();
+  void set_6_l();
+  void set_6_hl_ref();
+  void set_6_a();
+  void set_7_b();
+  void set_7_c();
+  void set_7_d();
+  void set_7_e();
+  void set_7_h();
+  void set_7_l();
+  void set_7_hl_ref();
+  void set_7_a();
 };
 
 enum class Instruction : uint8_t {
@@ -563,6 +854,280 @@ enum class Instruction : uint8_t {
   EI,
   CpAN = 0xFE,
   Rst7,
+};
+
+enum class Instruction16Bit : uint8_t {
+  RlcB,
+  RlcC,
+  RlcD,
+  RlcE,
+  RlcH,
+  RlcL,
+  RlcHLRef,
+  RlcA,
+  RrcB,
+  RrcC,
+  RrcD,
+  RrcE,
+  RrcH,
+  RrcL,
+  RrcHLRef,
+  RrcA,
+
+  RlB,
+  RlC,
+  RlD,
+  RlE,
+  RlH,
+  RlL,
+  RlHLRef,
+  RlA,
+  RrB,
+  RrC,
+  RrD,
+  RrE,
+  RrH,
+  RrL,
+  RrHLRef,
+  RrA,
+
+  SlaB,
+  SlaC,
+  SlaD,
+  SlaE,
+  SlaH,
+  SlaL,
+  SlaHLRef,
+  SlaA,
+  SraB,
+  SraC,
+  SraD,
+  SraE,
+  SraH,
+  SraL,
+  SraHLRef,
+  SraA,
+
+  SwapB,
+  SwapC,
+  SwapD,
+  SwapE,
+  SwapH,
+  SwapL,
+  SwapHLRef,
+  SwapA,
+  SrlB,
+  SrlC,
+  SrlD,
+  SrlE,
+  SrlH,
+  SrlL,
+  SrlHLRef,
+  SrlA,
+
+  Bit0B,
+  Bit0C,
+  Bit0D,
+  Bit0E,
+  Bit0H,
+  Bit0L,
+  Bit0HLRef,
+  Bit0A,
+  Bit1B,
+  Bit1C,
+  Bit1D,
+  Bit1E,
+  Bit1H,
+  Bit1L,
+  Bit1HLRef,
+  Bit1A,
+
+  Bit2B,
+  Bit2C,
+  Bit2D,
+  Bit2E,
+  Bit2H,
+  Bit2L,
+  Bit2HLRef,
+  Bit2A,
+  Bit3B,
+  Bit3C,
+  Bit3D,
+  Bit3E,
+  Bit3H,
+  Bit3L,
+  Bit3HLRef,
+  Bit3A,
+
+  Bit4B,
+  Bit4C,
+  Bit4D,
+  Bit4E,
+  Bit4H,
+  Bit4L,
+  Bit4HLRef,
+  Bit4A,
+  Bit5B,
+  Bit5C,
+  Bit5D,
+  Bit5E,
+  Bit5H,
+  Bit5L,
+  Bit5HLRef,
+  Bit5A,
+
+  Bit6B,
+  Bit6C,
+  Bit6D,
+  Bit6E,
+  Bit6H,
+  Bit6L,
+  Bit6HLRef,
+  Bit6A,
+  Bit7B,
+  Bit7C,
+  Bit7D,
+  Bit7E,
+  Bit7H,
+  Bit7L,
+  Bit7HLRef,
+  Bit7A,
+
+  Res0B,
+  Res0C,
+  Res0D,
+  Res0E,
+  Res0H,
+  Res0L,
+  Res0HLRef,
+  Res0A,
+  Res1B,
+  Res1C,
+  Res1D,
+  Res1E,
+  Res1H,
+  Res1L,
+  Res1HLRef,
+  Res1A,
+
+  Res2B,
+  Res2C,
+  Res2D,
+  Res2E,
+  Res2H,
+  Res2L,
+  Res2HLRef,
+  Res2A,
+  Res3B,
+  Res3C,
+  Res3D,
+  Res3E,
+  Res3H,
+  Res3L,
+  Res3HLRef,
+  Res3A,
+
+  Res4B,
+  Res4C,
+  Res4D,
+  Res4E,
+  Res4H,
+  Res4L,
+  Res4HLRef,
+  Res4A,
+  Res5B,
+  Res5C,
+  Res5D,
+  Res5E,
+  Res5H,
+  Res5L,
+  Res5HLRef,
+  Res5A,
+
+  Res6B,
+  Res6C,
+  Res6D,
+  Res6E,
+  Res6H,
+  Res6L,
+  Res6HLRef,
+  Res6A,
+  Res7B,
+  Res7C,
+  Res7D,
+  Res7E,
+  Res7H,
+  Res7L,
+  Res7HLRef,
+  Res7A,
+
+  Set0B,
+  Set0C,
+  Set0D,
+  Set0E,
+  Set0H,
+  Set0L,
+  Set0HLRef,
+  Set0A,
+  Set1B,
+  Set1C,
+  Set1D,
+  Set1E,
+  Set1H,
+  Set1L,
+  Set1HLRef,
+  Set1A,
+
+  Set2B,
+  Set2C,
+  Set2D,
+  Set2E,
+  Set2H,
+  Set2L,
+  Set2HLRef,
+  Set2A,
+  Set3B,
+  Set3C,
+  Set3D,
+  Set3E,
+  Set3H,
+  Set3L,
+  Set3HLRef,
+  Set3A,
+
+  Set4B,
+  Set4C,
+  Set4D,
+  Set4E,
+  Set4H,
+  Set4L,
+  Set4HLRef,
+  Set4A,
+  Set5B,
+  Set5C,
+  Set5D,
+  Set5E,
+  Set5H,
+  Set5L,
+  Set5HLRef,
+  Set5A,
+
+  Set6B,
+  Set6C,
+  Set6D,
+  Set6E,
+  Set6H,
+  Set6L,
+  Set6HLRef,
+  Set6A,
+  Set7B,
+  Set7C,
+  Set7D,
+  Set7E,
+  Set7H,
+  Set7L,
+  Set7HLRef,
+  Set7A,
 };
 
 } // namespace Core
