@@ -23,6 +23,22 @@ private:
   std::array<std::function<void()>, TOTAL_NUMBER_OF_INSTRUCTION> instructions_;
   uint32_t total_cycles_{};
 
+  void inc_reg(uint8_t &reg);
+  void dec_reg(uint8_t &reg);
+  void inc_word_reg(uint16_t &reg);
+  void dec_word_reg(uint16_t &reg);
+  void ld_reg_n(uint8_t& reg);
+  void ld_reg_reg(uint8_t& write_reg, uint8_t read_reg);
+  void ld_word_reg_nn(uint16_t& reg);
+  void add_reg_reg(uint8_t& write_reg, uint8_t read_reg);
+  void adc_reg_reg(uint8_t& write_reg, uint8_t read_reg);
+  void sub_reg_reg(uint8_t& write_reg, uint8_t read_reg);
+  void sbc_reg_reg(uint8_t& write_reg, uint8_t read_reg);
+  void and_reg_reg(uint8_t& write_reg, uint8_t read_reg);
+  void xor_reg_reg(uint8_t& write_reg, uint8_t read_reg);
+  void or_reg_reg(uint8_t& write_reg, uint8_t read_reg);
+  void cp_reg_reg(uint8_t& write_reg, uint8_t read_reg);
+  void rst(uint8_t addr);
   void pop_stack_into_reg_16(uint16_t &reg);
   void push_onto_stack_reg_16(uint16_t content);
   /* instruction set */
