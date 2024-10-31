@@ -553,6 +553,10 @@ Cpu::Cpu()
           std::bind(&Cpu::set_7_a, this),
     } {}
 
+const Registers& Cpu::registers() const {
+    return registers_;
+}
+
 uint8_t Cpu::fetch_current_instruction() {
   uint8_t opcode = memory_.read_byte(registers_.pc);
 
