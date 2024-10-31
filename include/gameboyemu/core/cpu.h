@@ -1128,7 +1128,5 @@ enum class Instruction16Bit : uint8_t {
   Set7A,
 };
 
-
-
 } // namespace Core
 } // namespace GameBoyEmu
