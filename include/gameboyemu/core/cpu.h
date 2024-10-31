@@ -11,8 +11,6 @@ namespace Core {
 enum class Instruction : uint8_t;
 enum class Instruction16Bit : uint8_t;
 
-enum class AdressingMode { Immediate, Reference };
-
 class Cpu {
 public:
   Cpu();
@@ -1129,6 +1127,8 @@ enum class Instruction16Bit : uint8_t {
   Set7HLRef,
   Set7A,
 };
+
+
 
 } // namespace Core
 } // namespace GameBoyEmu
