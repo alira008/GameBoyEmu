@@ -32,7 +32,7 @@ void Disassembler::DrawWindow() {
   // registers
   //----------------------------------------------------------------------------------
   GuiGroupBox((Rectangle){768, 24, 216, 252}, registers_group_box_text_.data());
-  const Registers registers = cpu_.registers();
+  const Registers& registers = cpu_.registers();
   Color z_flag_color = registers.zero ? RED : GRAY;
   Color n_flag_color = registers.subtract ? RED : GRAY;
   Color h_flag_color = registers.half_carry ? RED : GRAY;
