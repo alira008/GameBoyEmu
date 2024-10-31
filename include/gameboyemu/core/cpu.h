@@ -16,13 +16,15 @@ public:
   Cpu();
   uint8_t fetch_current_instruction();
   void execute_instruction(uint8_t opcode);
+  const Registers &registers() const;
 
 private:
   static constexpr uint32_t TOTAL_NUMBER_OF_INSTRUCTION = 256;
   Registers registers_{};
   Memory memory_{};
   std::array<std::function<void()>, TOTAL_NUMBER_OF_INSTRUCTION> instructions_;
-  std::array<std::function<void()>, TOTAL_NUMBER_OF_INSTRUCTION> instructions_16_bit;
+  std::array<std::function<void()>, TOTAL_NUMBER_OF_INSTRUCTION>
+      instructions_16_bit;
   uint32_t total_cycles_{};
 
   void inc_reg(uint8_t &reg);
