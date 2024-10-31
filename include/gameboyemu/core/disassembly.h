@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <string>
+#include <string_view>
 
 namespace GameBoyEmu {
 namespace Core {
@@ -151,6 +152,22 @@ static const std::array<std::string, 256> Instruction16BitNames = {
     "SET 6 B",    "SET 6 C", "SET 6 D",    "SET 6 E", "SET 6 H", "SET 6 L",
     "SET 6 (HL)", "SET 6 A", "SET 7 B",    "SET 7 C", "SET 7 D", "SET 7 E",
     "SET 7 H",    "SET 7 L", "SET 7 (HL)", "SET 7 A",
+};
+class Cpu;
+class Disassembler {
+public:
+  Disassembler(Cpu& cpu);
+  ~Disassembler();
+  void RunLoop();
+
+private:
+  Cpu &cpu_;
+  std::string_view registers_group_box_text_ = "Registers";
+  std::string_view address_space_group_box_text_ = "Addresses";
+  std::string_view memory_space_group_box_text_ = "Memory";
+  std::string_view disassembly_group_box_text_ = "Disassembly";
+  std::string_view controls_group_box_text_ = "Controls";
+  void DrawWindow();
 };
 
 } // namespace Core

@@ -10,9 +10,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(GameBoyEmu CXX)
 
+add_subdirectory(thirdparty)
+
 add_executable(GameBoyEmulator src/main.cpp src/core/cpu.cpp
-                               src/core/memory.cpp src/core/registers.cpp)
+                               src/core/memory.cpp src/core/registers.cpp src/core/disassembly.cpp)
 target_include_directories(GameBoyEmulator PUBLIC include)
+
+target_link_libraries(GameBoyEmulator PRIVATE raylib raygui)
 
 target_compile_options(
   GameBoyEmulator
