@@ -1,7 +1,6 @@
 #pragma once
 #include <array>
 #include <string>
-#include <string_view>
 
 namespace GameBoyEmu {
 namespace Core {
@@ -162,11 +161,11 @@ public:
 
 private:
   Cpu &cpu_;
-  std::string_view registers_group_box_text_ = "Registers";
-  std::string_view address_space_group_box_text_ = "Addresses";
-  std::string_view memory_space_group_box_text_ = "Memory";
-  std::string_view disassembly_group_box_text_ = "Disassembly";
-  std::string_view controls_group_box_text_ = "Controls";
+  const char* registers_group_box_text_ = "Registers";
+  const char* address_space_group_box_text_ = "Addresses";
+  const char* memory_space_group_box_text_ = "Memory";
+  const char* disassembly_group_box_text_ = "Disassembly";
+  const char* controls_group_box_text_ = "Controls";
   void DrawWindow();
 };
 
