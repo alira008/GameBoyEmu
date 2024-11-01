@@ -1,4 +1,5 @@
 #pragma once
+#include "raylib.h"
 #include <array>
 #include <string>
 
@@ -161,12 +162,14 @@ public:
 
 private:
   Cpu &cpu_;
+  Font font_;
   const char *registers_group_box_text_ = "Registers";
   const char *address_space_group_box_text_ = "Addresses";
   const char *memory_space_group_box_text_ = "Memory";
   const char *disassembly_group_box_text_ = "Disassembly";
   const char *controls_group_box_text_ = "Controls";
   void DrawWindow();
+  void DrawTextWithFont(const char *text, int posX, int posY, int fontSize, Color color);
 };
 
 } // namespace Core
