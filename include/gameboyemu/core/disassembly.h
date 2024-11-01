@@ -155,7 +155,7 @@ static const std::array<std::string, 256> Instruction16BitNames = {
 class Cpu;
 class Disassembler {
 public:
-  Disassembler(Cpu& cpu);
+  Disassembler(Cpu &cpu);
   ~Disassembler();
   void RunLoop();
 
