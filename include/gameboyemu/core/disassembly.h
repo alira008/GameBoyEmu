@@ -161,11 +161,11 @@ public:
 
 private:
   Cpu &cpu_;
-  const char* registers_group_box_text_ = "Registers";
-  const char* address_space_group_box_text_ = "Addresses";
-  const char* memory_space_group_box_text_ = "Memory";
-  const char* disassembly_group_box_text_ = "Disassembly";
-  const char* controls_group_box_text_ = "Controls";
+  const char *registers_group_box_text_ = "Registers";
+  const char *address_space_group_box_text_ = "Addresses";
+  const char *memory_space_group_box_text_ = "Memory";
+  const char *disassembly_group_box_text_ = "Disassembly";
+  const char *controls_group_box_text_ = "Controls";
   void DrawWindow();
 };
 
