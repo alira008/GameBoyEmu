@@ -60,7 +60,7 @@ void Disassembler::DrawTextWithFont(const char *text, int pos_x, int pos_y,
 void Disassembler::DrawWindow() {
   BeginDrawing();
 
-  ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
+  ClearBackground(GetColor(static_cast<unsigned int>(GuiGetStyle(DEFAULT, BACKGROUND_COLOR))));
 
   // raygui: controls drawing
   //----------------------------------------------------------------------------------
