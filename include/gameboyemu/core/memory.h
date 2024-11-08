@@ -15,7 +15,7 @@ public:
 
 private:
   static constexpr uint16_t MAX_SPACE = 0xFFFF;
-  std::array<uint8_t, MAX_SPACE> memory_space_;
+  std::array<uint8_t, MAX_SPACE + 1> memory_space_;
 };
 
 } // namespace Core
