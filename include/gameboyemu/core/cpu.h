@@ -17,6 +17,7 @@ public:
   uint8_t fetch_current_instruction();
   void execute_instruction(uint8_t opcode);
   const Registers &registers() const;
+  const Memory &memory() const;
 
 private:
   static constexpr uint32_t TOTAL_NUMBER_OF_INSTRUCTION = 256;

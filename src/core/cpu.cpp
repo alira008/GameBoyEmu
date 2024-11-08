@@ -555,6 +555,8 @@ Cpu::Cpu()
 
 const Registers &Cpu::registers() const { return registers_; }
 
+const Memory &Cpu::memory() const { return memory_; }
+
 uint8_t Cpu::fetch_current_instruction() {
   uint8_t opcode = memory_.read_byte(registers_.pc);
 
