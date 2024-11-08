@@ -43,7 +43,7 @@ void output_uint_to_buf(T num, char *buf, std::size_t max_size) {
   }
 }
 
-Disassembler::Disassembler(Cpu &cpu) : cpu_(cpu), font_{} {
+Disassembler::Disassembler(Cpu &cpu) : cpu_(cpu), font_{}, addr_page_{} {
   InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME.data());
   font_ = LoadFont("resources/roboto_font/Roboto-Regular.ttf");
 }
@@ -60,12 +60,37 @@ void Disassembler::DrawTextWithFont(const char *text, int pos_x, int pos_y,
 void Disassembler::DrawWindow() {
   BeginDrawing();
 
-  ClearBackground(GetColor(static_cast<unsigned int>(GuiGetStyle(DEFAULT, BACKGROUND_COLOR))));
+  ClearBackground(GetColor(
+      static_cast<unsigned int>(GuiGetStyle(DEFAULT, BACKGROUND_COLOR))));
 
   // raygui: controls drawing
   //----------------------------------------------------------------------------------
   GuiGroupBox(Rectangle{24, 24, 720, 552}, "Disassembler");
+
+  // address space
+  //----------------------------------------------------------------------------------
   GuiGroupBox(Rectangle{48, 48, 144, 504}, address_space_group_box_text_);
+
+  static const int MAX_ADDR_LEN = 10;
+  static const int MAX_ROWS_ADDR = 27;
+  static const int MAX_ROWS_BYTES_VISIBLE = 8;
+  char addr_buf[MAX_ADDR_LEN] = {};
+  uint16_t addr = static_cast<uint16_t>(addr_page_) *
+                  (MAX_ROWS_ADDR * MAX_ROWS_BYTES_VISIBLE);
+  for (int i = 0; i < MAX_ROWS_ADDR; ++i) {
+
+    int char_count = std::snprintf(addr_buf, sizeof(addr_buf), "0x%X", addr);
+    if (char_count >= MAX_ADDR_LEN) {
+      continue;
+    }
+    addr_buf[char_count] = '\0';
+    DrawTextWithFont(addr_buf, 66, 56 + i * 18, 18, GRAY);
+    if (static_cast<uint32_t>(addr) + MAX_ROWS_BYTES_VISIBLE >= 0xFFFF) {
+      break;
+    }
+    addr += MAX_ROWS_BYTES_VISIBLE;
+  }
+  //----------------------------------------------------------------------------------
   GuiGroupBox(Rectangle{24, 600, 960, 120}, controls_group_box_text_);
 
   // registers
@@ -85,84 +110,110 @@ void Disassembler::DrawWindow() {
                    FLAG_FONT_SIZE, GRAY);
   // DrawText("Flags:", REG_X_POS + REG_ITEM_PADDING * 1, FLAGS_Y_POS,
   //          FLAG_FONT_SIZE, GRAY);
-  DrawTextWithFont("Z", reg_offset_calc(FLAGS_OFFSET, REG_ITEM_PADDING, 2), FLAG_Y_POS,
-           REG_FONT_SIZE, z_flag_color);
-  DrawTextWithFont("N", reg_offset_calc(FLAGS_OFFSET, REG_ITEM_PADDING, 5), FLAG_Y_POS,
-           REG_FONT_SIZE, n_flag_color);
-  DrawTextWithFont("H", reg_offset_calc(FLAGS_OFFSET, REG_ITEM_PADDING, 8), FLAG_Y_POS,
-           REG_FONT_SIZE, h_flag_color);
-  DrawTextWithFont("C", reg_offset_calc(FLAGS_OFFSET, REG_ITEM_PADDING, 11), FLAG_Y_POS,
-           REG_FONT_SIZE, c_flag_color);
+  DrawTextWithFont("Z", reg_offset_calc(FLAGS_OFFSET, REG_ITEM_PADDING, 2),
+                   FLAG_Y_POS, REG_FONT_SIZE, z_flag_color);
+  DrawTextWithFont("N", reg_offset_calc(FLAGS_OFFSET, REG_ITEM_PADDING, 5),
+                   FLAG_Y_POS, REG_FONT_SIZE, n_flag_color);
+  DrawTextWithFont("H", reg_offset_calc(FLAGS_OFFSET, REG_ITEM_PADDING, 8),
+                   FLAG_Y_POS, REG_FONT_SIZE, h_flag_color);
+  DrawTextWithFont("C", reg_offset_calc(FLAGS_OFFSET, REG_ITEM_PADDING, 11),
+                   FLAG_Y_POS, REG_FONT_SIZE, c_flag_color);
   DrawTextWithFont("A:", REG_X_OFFSET,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 1), 18, GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 1), 18,
+                   GRAY);
   DrawTextWithFont("B:", REG_X_OFFSET,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 2), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 2),
+                   REG_FONT_SIZE, GRAY);
   DrawTextWithFont("C:", REG_X_OFFSET,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 3), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 3),
+                   REG_FONT_SIZE, GRAY);
   DrawTextWithFont("D:", REG_X_OFFSET,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 4), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 4),
+                   REG_FONT_SIZE, GRAY);
   DrawTextWithFont("E:", REG_X_OFFSET,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 5), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 5),
+                   REG_FONT_SIZE, GRAY);
   DrawTextWithFont("H:", REG_X_OFFSET,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 6), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 6),
+                   REG_FONT_SIZE, GRAY);
   DrawTextWithFont("L:", REG_X_OFFSET,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 7), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 7),
+                   REG_FONT_SIZE, GRAY);
   DrawTextWithFont("SP:", REG_X_OFFSET,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 8), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 8),
+                   REG_FONT_SIZE, GRAY);
   DrawTextWithFont("PC:", REG_X_OFFSET,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 9), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 9),
+                   REG_FONT_SIZE, GRAY);
 
   // register outputs
   output_uint_to_buf(registers.a, buf, max_buf_len);
   DrawTextWithFont(buf, REG_X_OFFSET + 36,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 1), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 1),
+                   REG_FONT_SIZE, GRAY);
   output_uint_to_buf(registers.b, buf, max_buf_len);
   DrawTextWithFont(buf, REG_X_OFFSET + 36,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 2), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 2),
+                   REG_FONT_SIZE, GRAY);
   output_uint_to_buf(registers.c, buf, max_buf_len);
   DrawTextWithFont(buf, REG_X_OFFSET + 36,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 3), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 3),
+                   REG_FONT_SIZE, GRAY);
   output_uint_to_buf(registers.d, buf, max_buf_len);
   DrawTextWithFont(buf, REG_X_OFFSET + 36,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 4), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 4),
+                   REG_FONT_SIZE, GRAY);
   output_uint_to_buf(registers.e, buf, max_buf_len);
   DrawTextWithFont(buf, REG_X_OFFSET + 36,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 5), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 5),
+                   REG_FONT_SIZE, GRAY);
   output_uint_to_buf(registers.h, buf, max_buf_len);
   DrawTextWithFont(buf, REG_X_OFFSET + 36,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 6), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 6),
+                   REG_FONT_SIZE, GRAY);
   output_uint_to_buf(registers.l, buf, max_buf_len);
   DrawTextWithFont(buf, REG_X_OFFSET + 36,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 7), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 7),
+                   REG_FONT_SIZE, GRAY);
   output_uint_to_buf(registers.sp, buf, max_buf_len);
   DrawTextWithFont(buf, REG_X_OFFSET + 36,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 8), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 8),
+                   REG_FONT_SIZE, GRAY);
   output_uint_to_buf(registers.pc, buf, max_buf_len);
   DrawTextWithFont(buf, REG_X_OFFSET + 36,
-           reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 9), REG_FONT_SIZE,
-           GRAY);
+                   reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 9),
+                   REG_FONT_SIZE, GRAY);
   //----------------------------------------------------------------------------------
 
   GuiGroupBox(Rectangle{768, 240, 216, 336}, disassembly_group_box_text_);
+
+  // memory space
+  //----------------------------------------------------------------------------------
   GuiGroupBox(Rectangle{216, 48, 500, 504}, memory_space_group_box_text_);
-  DrawTextWithFont("0x0000", 66, 56, 18, GRAY);
-  DrawTextWithFont("0xFFFF", 66, 78, 18, GRAY);
+
+  static const int MAX_MEMORY_BYTES_VISIBLE = 8;
+  static const int MAX_MEMORY_BUF = 8;
+  char memory_buf[MAX_MEMORY_BUF] = {};
+  const Memory &cpu_memory = cpu_.memory();
+  uint16_t memory_addr = 0;
+  for (int i = 0; i < MAX_ROWS_ADDR; ++i) {
+    for (int j = 0; MAX_MEMORY_BYTES_VISIBLE; ++j) {
+      // std::printf("0x%X\n", memory_addr);
+      uint8_t data = cpu_memory.read_byte(memory_addr);
+
+      int data_len = std::snprintf(memory_buf, sizeof(memory_buf), "%X", data);
+      if (data_len >= MAX_MEMORY_BUF) {
+        continue;
+      }
+      memory_buf[data_len] = '\0';
+      // DrawTextWithFont(memory_buf, 216 + (j + 1) * REG_FONT_SIZE,
+      //                  56 + i * REG_FONT_SIZE, REG_FONT_SIZE, GRAY);
+      ++memory_addr;
+    }
+  }
+  //----------------------------------------------------------------------------------
+
+  // DrawTextWithFont("0xFFFF", 66, 78, 18, GRAY);
   //----------------------------------------------------------------------------------
 
   EndDrawing();
