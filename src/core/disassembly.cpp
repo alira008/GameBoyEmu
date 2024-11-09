@@ -197,17 +197,17 @@ void Disassembler::DrawWindow() {
   const Memory &cpu_memory = cpu_.memory();
   uint16_t memory_addr = 0;
   for (int i = 0; i < MAX_ROWS_ADDR; ++i) {
-    for (int j = 0; MAX_MEMORY_BYTES_VISIBLE; ++j) {
-      // std::printf("0x%X\n", memory_addr);
+    for (int j = 0; j < MAX_MEMORY_BYTES_VISIBLE; ++j) {
       uint8_t data = cpu_memory.read_byte(memory_addr);
 
-      int data_len = std::snprintf(memory_buf, sizeof(memory_buf), "%X", data);
+      int data_len =
+          std::snprintf(memory_buf, sizeof(memory_buf), "%02X", data);
       if (data_len >= MAX_MEMORY_BUF) {
         continue;
       }
       memory_buf[data_len] = '\0';
-      // DrawTextWithFont(memory_buf, 216 + (j + 1) * REG_FONT_SIZE,
-      //                  56 + i * REG_FONT_SIZE, REG_FONT_SIZE, GRAY);
+      DrawTextWithFont(memory_buf, 216 + (j + 1) * REG_FONT_SIZE,
+                       56 + i * REG_FONT_SIZE, REG_FONT_SIZE, GRAY);
       ++memory_addr;
     }
   }
