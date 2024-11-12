@@ -73,10 +73,10 @@ void Disassembler::DrawWindow() {
 
   static const int MAX_ADDR_LEN = 10;
   static const int MAX_ROWS_ADDR = 27;
-  static const int MAX_ROWS_BYTES_VISIBLE = 8;
+  static const int MAX_BYTES_VISIBLE_PER_ROW = 12;
   char addr_buf[MAX_ADDR_LEN] = {};
   uint16_t addr = static_cast<uint16_t>(addr_page_) *
-                  (MAX_ROWS_ADDR * MAX_ROWS_BYTES_VISIBLE);
+                  (MAX_ROWS_ADDR * MAX_BYTES_VISIBLE_PER_ROW);
   for (int i = 0; i < MAX_ROWS_ADDR; ++i) {
 
     int char_count = std::snprintf(addr_buf, sizeof(addr_buf), "0x%X", addr);
@@ -85,10 +85,10 @@ void Disassembler::DrawWindow() {
     }
     addr_buf[char_count] = '\0';
     DrawTextWithFont(addr_buf, 66, 56 + i * 18, 18, GRAY);
-    if (static_cast<uint32_t>(addr) + MAX_ROWS_BYTES_VISIBLE >= 0xFFFF) {
+    if (static_cast<uint32_t>(addr) + MAX_BYTES_VISIBLE_PER_ROW >= 0xFFFF) {
       break;
     }
-    addr += MAX_ROWS_BYTES_VISIBLE;
+    addr += MAX_BYTES_VISIBLE_PER_ROW;
   }
   //----------------------------------------------------------------------------------
   GuiGroupBox(Rectangle{24, 600, 960, 120}, controls_group_box_text_);
@@ -147,6 +147,7 @@ void Disassembler::DrawWindow() {
                    REG_FONT_SIZE, GRAY);
 
   // register outputs
+
   output_uint_to_buf(registers.a, buf, max_buf_len);
   DrawTextWithFont(buf, REG_X_OFFSET + 36,
                    reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 1),
@@ -183,6 +184,7 @@ void Disassembler::DrawWindow() {
   DrawTextWithFont(buf, REG_X_OFFSET + 36,
                    reg_offset_calc(REG_Y_INIT_OFFSET, REG_FONT_SIZE, 9),
                    REG_FONT_SIZE, GRAY);
+
   //----------------------------------------------------------------------------------
 
   GuiGroupBox(Rectangle{768, 240, 216, 336}, disassembly_group_box_text_);
@@ -191,13 +193,13 @@ void Disassembler::DrawWindow() {
   //----------------------------------------------------------------------------------
   GuiGroupBox(Rectangle{216, 48, 500, 504}, memory_space_group_box_text_);
 
-  static const int MAX_MEMORY_BYTES_VISIBLE = 8;
   static const int MAX_MEMORY_BUF = 8;
+  static const int SPACE_BETWEEN_MEMORY = 8;
   char memory_buf[MAX_MEMORY_BUF] = {};
   const Memory &cpu_memory = cpu_.memory();
   uint16_t memory_addr = 0;
   for (int i = 0; i < MAX_ROWS_ADDR; ++i) {
-    for (int j = 0; j < MAX_MEMORY_BYTES_VISIBLE; ++j) {
+    for (int j = 0; j < MAX_BYTES_VISIBLE_PER_ROW; ++j) {
       uint8_t data = cpu_memory.read_byte(memory_addr);
 
       int data_len =
@@ -206,8 +208,9 @@ void Disassembler::DrawWindow() {
         continue;
       }
       memory_buf[data_len] = '\0';
-      DrawTextWithFont(memory_buf, 216 + (j + 1) * REG_FONT_SIZE,
-                       56 + i * REG_FONT_SIZE, REG_FONT_SIZE, GRAY);
+      int x_pos = 236 + j * (REG_FONT_SIZE + SPACE_BETWEEN_MEMORY);
+      int y_pos = 56 + i * REG_FONT_SIZE;
+      DrawTextWithFont(memory_buf, x_pos, y_pos, REG_FONT_SIZE, GRAY);
       ++memory_addr;
     }
   }
