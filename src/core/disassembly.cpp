@@ -43,7 +43,8 @@ void output_uint_to_buf(T num, char *buf, std::size_t max_size) {
   }
 }
 
-Disassembler::Disassembler(Cpu &cpu) : cpu_(cpu), font_{}, addr_page_{} {
+Disassembler::Disassembler(Cpu &cpu)
+    : cpu_(cpu), font_{}, current_addr_page_{} {
   InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME.data());
   font_ = LoadFont("resources/roboto_font/Roboto-Regular.ttf");
 }
@@ -74,8 +75,11 @@ void Disassembler::DrawWindow() {
   static const int MAX_ADDR_LEN = 10;
   static const int MAX_ROWS_ADDR = 27;
   static const int MAX_BYTES_VISIBLE_PER_ROW = 12;
+  static const int MAX_PAGES =
+      static_cast<int>(0xFFFF / static_cast<double>(MAX_BYTES_VISIBLE_PER_ROW) /
+                       static_cast<double>(MAX_ROWS_ADDR));
   char addr_buf[MAX_ADDR_LEN] = {};
-  uint16_t addr = static_cast<uint16_t>(addr_page_) *
+  uint16_t addr = static_cast<uint16_t>(current_addr_page_) *
                   (MAX_ROWS_ADDR * MAX_BYTES_VISIBLE_PER_ROW);
   for (int i = 0; i < MAX_ROWS_ADDR; ++i) {
 
@@ -92,6 +96,37 @@ void Disassembler::DrawWindow() {
   }
   //----------------------------------------------------------------------------------
   GuiGroupBox(Rectangle{24, 600, 960, 120}, controls_group_box_text_);
+  DrawTextWithFont("<j> Previous Page", 24 + REG_FONT_SIZE, 618, 16, GRAY);
+  DrawTextWithFont("<k> Next Page", 24 + REG_FONT_SIZE, 636, 16, GRAY);
+  DrawTextWithFont("<l> Next Instruction", 24 + REG_FONT_SIZE, 654, 16, GRAY);
+  DrawTextWithFont("<u> Back 5 Pages", 24 + (REG_FONT_SIZE * 12), 618, 16,
+                   GRAY);
+  DrawTextWithFont("<i> Forward 5 Pages", 24 + (REG_FONT_SIZE * 12), 636, 16,
+                   GRAY);
+  DrawTextWithFont("<m> Back 10 Pages", 24 + (REG_FONT_SIZE * 12), 654, 16, GRAY);
+  DrawTextWithFont("<,> Forward 10 Pages", 24 + (REG_FONT_SIZE * 24), 618, 16,
+                   GRAY);
+  if (IsKeyPressed(KEY_J) && current_addr_page_ >= 1) {
+    current_addr_page_ -= 1;
+  } else if (IsKeyPressed(KEY_K) && current_addr_page_ < MAX_PAGES) {
+    current_addr_page_ += 1;
+  } else if (IsKeyPressed(KEY_U) && current_addr_page_ > 5) {
+    current_addr_page_ -= 5;
+  } else if (IsKeyPressed(KEY_U) && current_addr_page_ - 5 <= 0) {
+    current_addr_page_ = 0;
+  } else if (IsKeyPressed(KEY_I) && current_addr_page_ < MAX_PAGES - 5) {
+    current_addr_page_ += 5;
+  } else if (IsKeyPressed(KEY_I) && current_addr_page_ + 5 >= MAX_PAGES - 5) {
+    current_addr_page_ = MAX_PAGES;
+  } else if (IsKeyPressed(KEY_M) && current_addr_page_ > 10) {
+    current_addr_page_ -= 10;
+  } else if (IsKeyPressed(KEY_M) && current_addr_page_ - 10 <= 0) {
+    current_addr_page_ = 0;
+  } else if (IsKeyPressed(KEY_COMMA) && current_addr_page_ < MAX_PAGES - 10) {
+    current_addr_page_ += 10;
+  } else if (IsKeyPressed(KEY_COMMA) && current_addr_page_ + 10 >= MAX_PAGES - 10) {
+    current_addr_page_ = MAX_PAGES;
+  }
 
   // registers
   //----------------------------------------------------------------------------------
@@ -197,7 +232,8 @@ void Disassembler::DrawWindow() {
   static const int SPACE_BETWEEN_MEMORY = 8;
   char memory_buf[MAX_MEMORY_BUF] = {};
   const Memory &cpu_memory = cpu_.memory();
-  uint16_t memory_addr = 0;
+  uint16_t memory_addr = static_cast<uint16_t>(current_addr_page_) *
+                         (MAX_ROWS_ADDR * MAX_BYTES_VISIBLE_PER_ROW);
   for (int i = 0; i < MAX_ROWS_ADDR; ++i) {
     for (int j = 0; j < MAX_BYTES_VISIBLE_PER_ROW; ++j) {
       uint8_t data = cpu_memory.read_byte(memory_addr);
@@ -216,7 +252,6 @@ void Disassembler::DrawWindow() {
   }
   //----------------------------------------------------------------------------------
 
-  // DrawTextWithFont("0xFFFF", 66, 78, 18, GRAY);
   //----------------------------------------------------------------------------------
 
   EndDrawing();

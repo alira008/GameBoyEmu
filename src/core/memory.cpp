@@ -4,6 +4,8 @@
 namespace GameBoyEmu {
 namespace Core {
 
+Memory::Memory() {}
+
 uint8_t Memory::read_byte(uint16_t addr) const {
   assert(addr >= 0 && addr <= MAX_SPACE);
   return memory_space_[addr];

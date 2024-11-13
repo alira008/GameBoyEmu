@@ -163,7 +163,7 @@ public:
 private:
   Cpu &cpu_;
   Font font_;
-  int addr_page_;
+  int current_addr_page_;
   const char *registers_group_box_text_ = "Registers";
   const char *address_space_group_box_text_ = "Addresses";
   const char *memory_space_group_box_text_ = "Memory";
